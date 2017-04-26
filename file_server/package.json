@@ -1,0 +1,30 @@
+{
+  "name": "cfcwm-cms-file-server",
+  "version": "1.0.0",
+  "description": "File server for serving Rainfall, Discharge and Water Level results",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gihankarunarathne/cfcwm-cms.git"
+  },
+  "keywords": [
+    "cfcwm",
+    "cms",
+    "file",
+    "server"
+  ],
+  "author": "Gihan Karunarathne <gckarunarathne@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/gihankarunarathne/cfcwm-cms/issues"
+  },
+  "homepage": "https://github.com/gihankarunarathne/cfcwm-cms#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "serve-index": "^1.8.0"
+  }
+}
