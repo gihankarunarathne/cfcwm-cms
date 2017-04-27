@@ -90,4 +90,5 @@ try :
 except Exception as e :
     traceback.print_exc()
 finally:
-    print('Completed write ', OBS_FLOW_FILE, ' and ', SIM_FLOW_FILE, 'into', RGRAPHS_FILE_PATH', RGRAPHS_FILE_PATH, ', RGRAPHS_CURR_FILE_PATH', RGRAPHS_CURR_FILE_PATH)
+    print('Completed write ', OBS_FLOW_FILE, ' and ', SIM_FLOW_FILE)
+    print('into RGRAPHS_FILE_PATH', RGRAPHS_FILE_PATH, 'RGRAPHS_CURR_FILE_PATH', RGRAPHS_CURR_FILE_PATH)
