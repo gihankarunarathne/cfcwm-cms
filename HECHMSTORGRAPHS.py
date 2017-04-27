@@ -14,12 +14,12 @@ Usage: ./HECHMSTORGRAPHS.py [-d date] [-h]
 
 
 try :
-    # RGRAPHS_DIR = '/var/www/html/rgraphs/'
-    RGRAPHS_DIR = './'
+    RGRAPHS_DIR = '/var/www/html/rgraphs'
+    # RGRAPHS_DIR = './'
 
     DISCHARGE_FILE = 'DailyDischarge.csv'
     OBS_FLOW_FILE = './data/DIS/DailyDischargeObs.csv'
-    SIM_FLOW_DIR = './data/DIS/'
+    SIM_FLOW_DIR = './data/DIS'
     SIM_FLOW_FILE = 'DailyDischarge.csv'
 
     OBS_META_LINES = 0
@@ -52,7 +52,7 @@ try :
     SIM_FLOW_FILE_PATH = "%s/%s" % (SIM_FLOW_DIR, fileName)
 
     fileName1 = DISCHARGE_FILE.split('.', 1)
-    fileName1 = "%s-%s.%s" % (fileName[0], date, fileName[1])
+    fileName1 = "%s-%s.%s" % (fileName1[0], date, fileName1[1])
     RGRAPHS_FILE_PATH = "%s/%s" % (RGRAPHS_DIR, fileName1)
     RGRAPHS_CURR_FILE_PATH = "%s/%s" % (RGRAPHS_DIR, DISCHARGE_FILE)
 
@@ -90,4 +90,4 @@ try :
 except Exception as e :
     traceback.print_exc()
 finally:
-    print('Completed ', OBS_FLOW_FILE, ' and ', SIM_FLOW_FILE)
+    print('Completed write ', OBS_FLOW_FILE, ' and ', SIM_FLOW_FILE, 'into', RGRAPHS_FILE_PATH', RGRAPHS_FILE_PATH, ', RGRAPHS_CURR_FILE_PATH', RGRAPHS_CURR_FILE_PATH)
