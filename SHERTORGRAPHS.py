@@ -17,8 +17,13 @@ try :
     OBS_FLOW_FILE = './SHER/ObsFlowHanwella-2016.csv'
     SIM_FLOW_FILE = './SHER/ComFlowHanwella-2016.csv'
 
+    OBS_META_LINES = 2
+    SIM_META_LINES = 0
+
+
+
     try:
-        startDateTime = '';               
+        startDateTime = '';            
         endDateTime = '';
 
         opts, args = getopt.getopt(sys.argv[1:], "hs:e:", ["help", "start=", "end="])
@@ -28,13 +33,15 @@ try :
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()                     
-            sys.exit()                
+            sys.exit()           
         elif opt in ("-s", "--start"):
             startDateTime = arg
         elif opt in ("-e", "--end"):
             endDateTime = arg
 
     print('Start with ', startDateTime, endDateTime)
+
+
 
 except Exception as e :
     traceback.print_exc()
