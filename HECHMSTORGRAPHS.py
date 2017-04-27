@@ -62,8 +62,8 @@ try :
     csvWriter = csv.writer(open(RGRAPHS_FILE_PATH, 'w'), delimiter=',', quotechar='|')
     csvWriterCurr = csv.writer(open(RGRAPHS_CURR_FILE_PATH, 'w'), delimiter=',', quotechar='|')
 
-    csvWriter.writerow(['Annotation', 'Hanwella', 'Time'])
-    csvWriterCurr.writerow(['Time', 'Hanwella', 'Annotation'])
+    csvWriter.writerow(['Annotation', 'Value' , 'Hydrograph', 'Time'])
+    csvWriter.writerow(['Annotation', 'Value' , 'Hydrograph', 'Time'])
 
     lines = [];
     # Ref: https://support.office.com/en-us/article/DATEVALUE-function-df8b07d4-7761-4a93-bc33-b7471bbff252
@@ -83,8 +83,8 @@ try :
 
         serialNumber = (d.timestamp() - base.timestamp())/ (24*60*60)
         # print('         >> ', serialNumber)
-        csvWriter.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], serialNumber])
-        csvWriterCurr.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], serialNumber])
+        csvWriter.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
+        csvWriterCurr.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
 
 
 except Exception as e :
