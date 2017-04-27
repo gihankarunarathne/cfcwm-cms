@@ -63,7 +63,7 @@ try :
     csvWriterCurr = csv.writer(open(RGRAPHS_CURR_FILE_PATH, 'w'), delimiter=',', quotechar='|')
 
     csvWriter.writerow(['Annotation', 'Value' , 'Hydrograph', 'Time'])
-    csvWriter.writerow(['Annotation', 'Value' , 'Hydrograph', 'Time'])
+    csvWriterCurr.writerow(['Annotation', 'Value' , 'Hydrograph', 'Time'])
 
     lines = [];
     # Ref: https://support.office.com/en-us/article/DATEVALUE-function-df8b07d4-7761-4a93-bc33-b7471bbff252
