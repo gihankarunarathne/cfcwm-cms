@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, traceback, csv, json, datetime, getopt
+import sys, traceback, csv, json, datetime, getopt, os
 from os.path import join as pjoin
 
 def usage() :
@@ -47,10 +47,10 @@ try :
     # Default run for current day
     now = datetime.datetime.now()
     if date :
-        now = datetime.datetime.strptime(d, '%Y-%m-%d')
+        now = datetime.datetime.strptime(date, '%Y-%m-%d')
 
     if backDays :
-        print('backDays', backDays)
+        print('Looking into backDays', backDays, 'from', now.strftime("%Y-%m-%d"))
         now = now - datetime.timedelta(days=backDays)
 
     date = now.strftime("%Y-%m-%d")
@@ -65,6 +65,10 @@ try :
     fileName1 = "%s-%s.%s" % (fileName1[0], date, fileName1[1])
     RGRAPHS_FILE_PATH = "%s/%s" % (RGRAPHS_DIR, fileName1)
     RGRAPHS_CURR_FILE_PATH = "%s/%s" % (RGRAPHS_DIR, DISCHARGE_FILE)
+
+    if not os.path.exists(SIM_FLOW_FILE_PATH):
+        print('Unable to find file : ', SIM_FLOW_FILE_PATH)
+        sys.exit()
 
     csvReader = csv.reader(open(SIM_FLOW_FILE_PATH, 'r'), delimiter=',', quotechar='|')
     csvList = list(csvReader)
