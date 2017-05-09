@@ -7,15 +7,17 @@ def usage() :
     usageText = """
 Usage: ./HECHMSTORGRAPHS.py [-d date] [-h]
 
--h  Show usage
--d  Date in YYYY-MM. Default is current date.
+-h  --help      Show usage
+-d  --date      Date in YYYY-MM. Default is current date.
+-b  --backDays  Run forecast specified backDays with respect to current date. Expect an integer.
+                When specified -d option will be ignored.
 """
     print(usageText)
 
 
 try :
     RGRAPHS_DIR = '/var/www/html/rgraphs'
-    # RGRAPHS_DIR = './'
+    RGRAPHS_DIR = './'
 
     DISCHARGE_FILE = 'DailyDischarge.csv'
     OBS_FLOW_FILE = './data/DIS/DailyDischargeObs.csv'
@@ -25,10 +27,11 @@ try :
     OBS_META_LINES = 0
     SIM_META_LINES = 2
 
-    d = ''
+    date = ''
+    backDays = 0
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hd:", ["help", "date="])
+        opts, args = getopt.getopt(sys.argv[1:], "hd:b:", ["help", "date=", "backDays="])
     except getopt.GetoptError:          
         usage()                        
         sys.exit(2)                     
@@ -37,12 +40,19 @@ try :
             usage()                     
             sys.exit()           
         elif opt in ("-d", "--date"):
-            d = arg
+            date = arg
+        elif opt in ("-b", "--backDays"):
+            backDays = int(arg)
 
     # Default run for current day
     now = datetime.datetime.now()
-    if d : # Or taken from first arg for the program
+    if date :
         now = datetime.datetime.strptime(d, '%Y-%m-%d')
+
+    if backDays :
+        print('backDays', backDays)
+        now = now - datetime.timedelta(days=backDays)
+
     date = now.strftime("%Y-%m-%d")
     
     print('Start with ', date)
