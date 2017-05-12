@@ -10,12 +10,13 @@ Usage: ./HECHMSTORGRAPHS.py [-d date] [-h]
 -h  --help      Show usage
 -d  --date      Date in YYYY-MM. Default is current date.
 -b  --backDays  Run forecast specified backDays with respect to current date. Expect an integer.
-                When specified -d option will be ignored.
+                When -d is specified, counting from that date.
 """
     print(usageText)
 
 
 try :
+    INIT_DIR = os.getcwd()
     RGRAPHS_DIR = '/var/www/html/rgraphs'
     RGRAPHS_DIR = './'
 
@@ -54,8 +55,10 @@ try :
         now = now - datetime.timedelta(days=backDays)
 
     date = now.strftime("%Y-%m-%d")
+    ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(ROOT_DIR)
     
-    print('Start with ', date)
+    print('Start with ', date, 'on dir', ROOT_DIR)
 
     fileName = SIM_FLOW_FILE.split('.', 1)
     fileName = "%s-%s.%s" % (fileName[0], date, fileName[1])
@@ -104,5 +107,6 @@ try :
 except Exception as e :
     traceback.print_exc()
 finally:
+    os.chdir(INIT_DIR)
     print('Completed write ', OBS_FLOW_FILE, ' and ', SIM_FLOW_FILE)
     print('into RGRAPHS_FILE_PATH', RGRAPHS_FILE_PATH, 'RGRAPHS_CURR_FILE_PATH', RGRAPHS_CURR_FILE_PATH)
