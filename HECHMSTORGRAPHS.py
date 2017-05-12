@@ -18,7 +18,7 @@ Usage: ./HECHMSTORGRAPHS.py [-d date] [-h]
 try :
     INIT_DIR = os.getcwd()
     RGRAPHS_DIR = '/var/www/html/rgraphs'
-    RGRAPHS_DIR = './'
+    # RGRAPHS_DIR = './'
 
     DISCHARGE_FILE = 'DailyDischarge.csv'
     OBS_FLOW_FILE = './data/DIS/DailyDischargeObs.csv'
