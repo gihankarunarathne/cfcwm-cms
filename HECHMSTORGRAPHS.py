@@ -100,8 +100,8 @@ try :
 
         serialNumber = (d.timestamp() - base.timestamp())/ (24*60*60)
         # print('         >> ', serialNumber)
-        csvWriter.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
-        csvWriterCurr.writerow([d.strftime('%m/%d/%y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
+        csvWriter.writerow([d.strftime('%m/%d/%Y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
+        csvWriterCurr.writerow([d.strftime('%m/%d/%Y %H:%M:%S'), value[1], 'Hanwella', serialNumber])
 
 
 except Exception as e :
