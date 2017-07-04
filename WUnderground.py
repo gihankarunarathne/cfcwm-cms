@@ -43,12 +43,17 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
     print('MMMM', WUndergroundMeta)
     DateUTCIndex = WUndergroundMeta.index('DateUTC')
     TemperatureCIndex = 1
-    TemperatureFIndex = 0
+    TemperatureFIndex = -1
     if 'TemperatureC' in WUndergroundMeta :
         TemperatureCIndex = WUndergroundMeta.index('TemperatureC')
     if 'TemperatureF' in WUndergroundMeta :
         TemperatureFIndex = WUndergroundMeta.index('TemperatureF')
-    HourlyPrecipMMIndex = WUndergroundMeta.index('HourlyPrecipMM')
+    HourlyPrecipMMIndex = 9
+    HourlyPrecipInchIndex = -1
+    if 'HourlyPrecipMMIndex' in WUndergroundMeta:
+        HourlyPrecipMMIndex = WUndergroundMeta.index('HourlyPrecipMM')
+    if 'HourlyPrecipInchIndex' in WUndergroundMeta:
+        HourlyPrecipInchIndex = WUndergroundMeta.index('HourlyPrecipInch')
 
     def Precipitation(myTimeseries):
         print('Precipitation:: HourlyPrecipMM')
@@ -57,7 +62,10 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         for t in myTimeseries :
             currTime = datetime.datetime.strptime(t[DateUTCIndex], '%Y-%m-%d %H:%M:%S')
             gap = currTime - prevTime
-            precipitationInGap = float(t[HourlyPrecipMMIndex]) * gap.seconds / 3600 # If rate per Hour given, calculate for interval
+            prec = t[HourlyPrecipMMIndex]
+            if HourlyPrecipInchIndex > -1 :
+                prec = t[HourlyPrecipInchIndex]
+            precipitationInGap = float(prec) * gap.seconds / 3600 # If rate per Hour given, calculate for interval
             # if precipitationInGap > 0 :
             #     print('\n', float(t[HourlyPrecipMMIndex]), precipitationInGap)
             newTimeseries.append([t[DateUTCIndex], precipitationInGap])
@@ -70,8 +78,8 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         newTimeseries = []
         for t in myTimeseries :
             temp = t[TemperatureCIndex]
-            if TemperatureFIndex :
-                temp = (temp - 32) * 5 / 9
+            if TemperatureFIndex > -1 :
+                temp = (t[TemperatureFIndex] - 32) * 5 / 9
             newTimeseries.append([t[DateUTCIndex], temp])
         return newTimeseries
 
