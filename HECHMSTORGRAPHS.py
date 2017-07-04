@@ -33,13 +33,13 @@ try :
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hd:b:", ["help", "date=", "backDays="])
-    except getopt.GetoptError:          
-        usage()                        
-        sys.exit(2)                     
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            usage()                     
-            sys.exit()           
+            usage()
+            sys.exit()
         elif opt in ("-d", "--date"):
             date = arg
         elif opt in ("-b", "--backDays"):
