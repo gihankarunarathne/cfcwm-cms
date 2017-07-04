@@ -39,9 +39,15 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
     WUnderground Meta Data structure (1st row)
     ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC']
     '''
-    WUndergroundMeta = opts.get('WUndergroundMeta', ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC'])
+    WUndergroundMeta = opts.get('WUndergroundMeta', [])
+    print('MMMM', WUndergroundMeta)
     DateUTCIndex = WUndergroundMeta.index('DateUTC')
-    TemperatureCIndex = WUndergroundMeta.index('TemperatureC')
+    TemperatureCIndex = 1
+    TemperatureFIndex = 0
+    if 'TemperatureC' in WUndergroundMeta :
+        TemperatureCIndex = WUndergroundMeta.index('TemperatureC')
+    if 'TemperatureF' in WUndergroundMeta :
+        TemperatureFIndex = WUndergroundMeta.index('TemperatureF')
     HourlyPrecipMMIndex = WUndergroundMeta.index('HourlyPrecipMM')
 
     def Precipitation(myTimeseries):
@@ -63,7 +69,10 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         print('Temperature:: TemperatureC')
         newTimeseries = []
         for t in myTimeseries :
-            newTimeseries.append([t[DateUTCIndex], t[TemperatureCIndex]])
+            temp = t[TemperatureCIndex]
+            if TemperatureFIndex :
+                temp = (temp - 32) * 5 / 9
+            newTimeseries.append([t[DateUTCIndex], temp])
         return newTimeseries
 
     def default(myTimeseries):
@@ -184,8 +193,8 @@ try:
             # print(newTimeseries)
             # continue
 
-            # for l in newTimeseries[:3] + newTimeseries[-2:] :
-            #     print(l)
+            for l in newTimeseries[:3] + newTimeseries[-2:] :
+                print(l)
 
             rowCount = adapter.insertTimeseries(eventId, newTimeseries, forceInsert)
             print('%s rows inserted.\n' % rowCount)
