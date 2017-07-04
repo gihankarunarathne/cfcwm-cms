@@ -32,11 +32,54 @@ def getTimeseries(BASE_URL, station, date) :
     # print('>>>> >>>')
     # print(timeseries)
     return timeseries
+    # --END getTimeseries --
+
+def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) :
+    '''
+    WUnderground Meta Data structure (1st row)
+    ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC']
+    '''
+    WUndergroundMeta = opts.get('WUndergroundMeta', ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC'])
+    DateUTCIndex = WUndergroundMeta.index('DateUTC')
+    TemperatureCIndex = WUndergroundMeta.index('TemperatureC')
+    HourlyPrecipMMIndex = WUndergroundMeta.index('HourlyPrecipMM')
+
+    def Precipitation(myTimeseries):
+        print('Precipitation:: HourlyPrecipMM')
+        newTimeseries = []
+        prevTime = datetime.datetime.strptime(timeseries[0][DateUTCIndex], '%Y-%m-%d %H:%M:%S')
+        for t in myTimeseries :
+            currTime = datetime.datetime.strptime(t[DateUTCIndex], '%Y-%m-%d %H:%M:%S')
+            gap = currTime - prevTime
+            precipitationInGap = float(t[HourlyPrecipMMIndex]) * gap.seconds / 3600 # If rate per Hour given, calculate for interval
+            # if precipitationInGap > 0 :
+            #     print('\n', float(t[HourlyPrecipMMIndex]), precipitationInGap)
+            newTimeseries.append([t[DateUTCIndex], precipitationInGap])
+            prevTime = currTime
+
+        return newTimeseries
+
+    def Temperature(myTimeseries):
+        print('Temperature:: TemperatureC')
+        newTimeseries = []
+        for t in myTimeseries :
+            newTimeseries.append([t[DateUTCIndex], t[TemperatureCIndex]])
+        return newTimeseries
+
+    def default(myTimeseries):
+        print('default')
+
+    variableDict = {
+        'Precipitation': Precipitation,
+        'Temperature': Temperature,
+    }
+    return variableDict.get(variable, default)(timeseries)
+    # --END extractSingleTimeseries --
 
 try:
     CONFIG = json.loads(open('CONFIG.json').read())
     INIT_DIR = os.getcwd()
-    # BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
+    # E.g. 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
     BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
 
     MYSQL_HOST="localhost"
@@ -87,8 +130,7 @@ try:
     stations = ['IBATTARA2', 'IBATTARA3', 'IBATTARA4']
     variables = ['Precipitation', 'Temperature']
     units = ['mm', 'oC']
-    # ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC']
-    wuIndex = [9 , 1]
+
     metaData = {
         'station': 'Hanwella',
         'variable': 'Precipitation',
@@ -100,7 +142,9 @@ try:
     adapter = mysqladapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
 
     for station in stations :
-        timeseries = getTimeseries(BASE_URL, station, now)[1:]
+        WUndergroundMeta, *timeseries = getTimeseries(BASE_URL, station, now) # List Destructuring
+        DateUTCIndex = WUndergroundMeta.index('DateUTC')
+
         if(len(timeseries) < 1): 
             print('INFO: Timeseries doesn\'t have any data on :', now.strftime("%Y-%m-%d"), timeseries)
             continue
@@ -135,10 +179,10 @@ try:
                 if len(existingTimeseries[0]['timeseries']) > 0 and not forceInsert:
                     print('\n')
                     continue
-            
-            newTimeseries = []
-            for t in timeseries :
-                newTimeseries.append([t[0], t[wuIndex[i]]])
+
+            newTimeseries = extractSigleTimeseries(timeseries, variables[i], {'WUndergroundMeta': WUndergroundMeta})
+            # print(newTimeseries)
+            # continue
 
             # for l in newTimeseries[:3] + newTimeseries[-2:] :
             #     print(l)
