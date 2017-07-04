@@ -80,6 +80,10 @@ try:
     ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
     os.chdir(ROOT_DIR)
 
+    print('WUnderground data extraction:', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'on', ROOT_DIR)
+    if forceInsert :
+        print('WARNING: Force Insert enabled')
+
     stations = ['IBATTARA2', 'IBATTARA3', 'IBATTARA4']
     variables = ['Precipitation', 'Temperature']
     units = ['mm', 'oC']
@@ -97,7 +101,9 @@ try:
 
     for station in stations :
         timeseries = getTimeseries(BASE_URL, station, now)[1:]
-        if(len(timeseries) < 1): continue
+        if(len(timeseries) < 1): 
+            print('INFO: Timeseries doesn\'t have any data on :', now.strftime("%Y-%m-%d"), timeseries)
+            continue
         print('Start Date :', timeseries[0][0])
         print('End Date :', timeseries[-1][0])
         startDateTime = datetime.datetime.strptime(timeseries[0][0], '%Y-%m-%d %H:%M:%S')
