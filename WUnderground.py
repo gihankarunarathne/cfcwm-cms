@@ -64,7 +64,7 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
             gap = currTime - prevTime
             prec = t[HourlyPrecipMMIndex]
             if HourlyPrecipInchIndex > -1 :
-                prec = t[HourlyPrecipInchIndex]
+                prec = float(t[HourlyPrecipInchIndex]) * 25.4
             precipitationInGap = float(prec) * gap.seconds / 3600 # If rate per Hour given, calculate for interval
             # if precipitationInGap > 0 :
             #     print('\n', float(t[HourlyPrecipMMIndex]), precipitationInGap)
@@ -79,7 +79,7 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         for t in myTimeseries :
             temp = t[TemperatureCIndex]
             if TemperatureFIndex > -1 :
-                temp = (t[TemperatureFIndex] - 32) * 5 / 9
+                temp = (float(t[TemperatureFIndex]) - 32) * 5 / 9
             newTimeseries.append([t[DateUTCIndex], temp])
         return newTimeseries
 
