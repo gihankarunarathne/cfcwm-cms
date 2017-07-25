@@ -39,8 +39,8 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
     WUnderground Meta Data structure (1st row)
     ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC']
     '''
-    WUndergroundMeta = opts.get('WUndergroundMeta', [])
-    print('MMMM', WUndergroundMeta)
+    WUndergroundMeta = opts.get('WUndergroundMeta', ['Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH', 'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM', 'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC'])
+
     DateUTCIndex = WUndergroundMeta.index('DateUTC')
     TemperatureCIndex = 1
     TemperatureFIndex = -1
@@ -94,8 +94,12 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
     # --END extractSingleTimeseries --
 
 try:
-    CONFIG = json.loads(open('CONFIG.json').read())
     INIT_DIR = os.getcwd()
+    ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(ROOT_DIR)
+
+    CONFIG = json.loads(open(os.path.join(ROOT_DIR, 'CONFIG.json')).read())
+
     # E.g. 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
     BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
 
@@ -136,9 +140,6 @@ try:
     now = datetime.datetime.now()
     if date :
         now = datetime.datetime.strptime(date, '%Y-%m-%d')
-
-    ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
-    os.chdir(ROOT_DIR)
 
     print('WUnderground data extraction:', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'on', ROOT_DIR)
     if forceInsert :
