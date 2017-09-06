@@ -6,21 +6,24 @@
             "source": "WeatherStation",
             "type": "Observed",
             "variables": ["Precipitation", "Temperature"],
-            "units": ["mm", "oC"]
+            "units": ["mm", "oC"],
+            "run_name": "Battaramulla"
         }, {
             "stationId": "IBATTARA3",
             "name": "IBATTARA3",
             "source": "WeatherStation",
             "type": "Observed",
             "variables": ["Precipitation", "Temperature"],
-            "units": ["mm", "oC"]
+            "units": ["mm", "oC"],
+            "run_name": "Battaramulla"
         }, {
             "stationId": "IBATTARA4",
             "name": "IBATTARA4",
             "source": "WeatherStation",
             "type": "Observed",
             "variables": ["Precipitation", "Temperature"],
-            "units": ["mm", "oC"]
+            "units": ["mm", "oC"],
+            "run_name": "Battaramulla"
         }
     ]
 }

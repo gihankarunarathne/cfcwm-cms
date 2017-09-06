@@ -186,6 +186,8 @@ try:
 
         variables = station['variables']
         units = station['units']
+        if 'run_name' in station :
+            meta['name'] = station['run_name']
         for i in range(0, len(variables)) :
             meta['variable'] = variables[i]
             meta['unit'] = units[i]
@@ -196,7 +198,11 @@ try:
             else :
                 print('HASH SHA256 exists: ', eventId)
                 metaQuery = copy.deepcopy(metaData)
-                metaQuery['station'] = station
+                metaQuery['station'] = station['name']
+                metaQuery['variable'] = variables[i]
+                metaQuery['unit'] = units[i]
+                if 'run_name' in station :
+                    metaQuery['name'] = station['run_name']
                 opts = {
                     'from': startDateTime.strftime("%Y-%m-%d %H:%M:%S"),
                     'to': endDateTime.strftime("%Y-%m-%d %H:%M:%S")
