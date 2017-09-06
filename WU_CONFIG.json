@@ -1,0 +1,26 @@
+{
+    "stations" : [
+        {
+            "stationId": "IBATTARA2",
+            "name": "IBATTARA2",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"]
+        }, {
+            "stationId": "IBATTARA3",
+            "name": "IBATTARA3",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"]
+        }, {
+            "stationId": "IBATTARA4",
+            "name": "IBATTARA4",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"]
+        }
+    ]
+}

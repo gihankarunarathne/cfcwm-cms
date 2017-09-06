@@ -100,7 +100,7 @@ INSERT INTO curw.type VALUES
   (1, 'Observed'),
   (2, 'Forecast');
 
-INSERT INTO source VALUES 
+INSERT INTO curw.source VALUES 
   (1, 'HEC-HMS'),
   (2, 'SHER'),
   (3, 'WRF'),

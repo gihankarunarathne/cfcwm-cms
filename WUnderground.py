@@ -5,7 +5,7 @@ from curwmysqladapter import mysqladapter
 
 def usage() :
     usageText = """
-Usage: ./HECHMSTORGRAPHS.py [-d date] [-h]
+Usage: ./WUnderground.py [-d date] [-h]
 
 -h  --help      Show usage
 -d  --date      Date in YYYY-MM. Default is current date.
@@ -103,10 +103,15 @@ try:
     # E.g. 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
     BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
 
+    WU_CONFIG="./WU_CONFIG.json"
+
     MYSQL_HOST="localhost"
     MYSQL_USER="root"
     MYSQL_DB="curw"
     MYSQL_PASSWORD=""
+
+    if 'WU_CONFIG' in CONFIG :
+        WU_CONFIG = CONFIG['WU_CONFIG']
 
     if 'MYSQL_HOST' in CONFIG :
         MYSQL_HOST = CONFIG['MYSQL_HOST']
@@ -145,9 +150,9 @@ try:
     if forceInsert :
         print('WARNING: Force Insert enabled')
 
-    stations = ['IBATTARA2', 'IBATTARA3', 'IBATTARA4']
-    variables = ['Precipitation', 'Temperature']
-    units = ['mm', 'oC']
+    WU_DATA = json.loads(open(WU_CONFIG).read())
+
+    stations = WU_DATA['stations']
 
     metaData = {
         'station': 'Hanwella',
@@ -155,12 +160,13 @@ try:
         'unit': 'mm',
         'type': 'Observed',
         'source': 'WeatherStation',
-        'name': 'Baththaramulla',
+        'name': 'WUnderground',
     }
     adapter = mysqladapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
 
     for station in stations :
-        WUndergroundMeta, *timeseries = getTimeseries(BASE_URL, station, now) # List Destructuring
+        print('station:', station)
+        WUndergroundMeta, *timeseries = getTimeseries(BASE_URL, station['stationId'], now) # List Destructuring
         DateUTCIndex = WUndergroundMeta.index('DateUTC')
 
         if(len(timeseries) < 1): 
@@ -174,10 +180,12 @@ try:
         # continue;
 
         meta = copy.deepcopy(metaData)
-        meta['station'] = station
+        meta['station'] = station['name']
         meta['start_date'] = startDateTime.strftime("%Y-%m-%d %H:%M:%S")
         meta['end_date'] = endDateTime.strftime("%Y-%m-%d %H:%M:%S")
 
+        variables = station['variables']
+        units = station['units']
         for i in range(0, len(variables)) :
             meta['variable'] = variables[i]
             meta['unit'] = units[i]
