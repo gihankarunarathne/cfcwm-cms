@@ -5,13 +5,14 @@ from subprocess import Popen
 
 try :
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", help="File name to be executed.")
+    parser.add_argument("-p", "--file-path", help="File name to be executed.")
     parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM.")
     parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.")
+    parser.add_argument("-f", "--force", action='store_true', help="Force insert.")
     args = parser.parse_args()
     print('Commandline Options:', args)
 
-    if not args.file and args.startDate and args.endDate :
+    if not args.file_path and args.start_date and args.end_date :
         print('All fields required.')
         sys.exit(2)
 
@@ -19,8 +20,10 @@ try :
     endDate = datetime.datetime.strptime(args.end_date, '%Y-%m-%d')
 
     while(startDate <= endDate) :
-        execList = ["python", args.file]
+        execList = ["python", args.file_path]
         execList = execList + ['-d' , startDate.strftime("%Y-%m-%d")]
+        if args.force :
+            execList = execList + ['-f']
         print('*********************************************************')
         print('>>>', execList, '\n')
         proc = Popen(execList, stdout=sys.stdout)
