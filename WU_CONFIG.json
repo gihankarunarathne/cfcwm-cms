@@ -24,6 +24,54 @@
             "variables": ["Precipitation", "Temperature"],
             "units": ["mm", "oC"],
             "run_name": "Battaramulla"
+        }, {
+            "stationId": "IWESTERN681",
+            "name": "Isurupaya",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "LRWHF STATION"
+        }, {
+            "stationId": "ICOLOMBO16",
+            "name": "Borella",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "TRACE EXPERT CITY STATION"
+        }, {
+            "stationId": "IWESTERN515",
+            "name": "Kompannaveediya",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "GALLE FACE GREEN, COLOMBO 3 STATION"
+        }, {
+            "stationId": "I1ANGURU2",
+            "name": "Angurukaramulla",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "NEGOMBO STATION"
+        }, {
+            "stationId": "I3MALIGA2",
+            "name": "Hirimbure",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "GALLE STATION"
+        }, {
+            "stationId": "IKANDY2",
+            "name": "Yatiwawala",
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "run_name": "UDUWAWALA STATION"
         }
     ]
 }
