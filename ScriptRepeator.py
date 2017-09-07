@@ -9,6 +9,7 @@ try :
     parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM.")
     parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.")
     parser.add_argument("-f", "--force", action='store_true', help="Force insert.")
+    parser.add_argument("-v", "--version", help="Python version. eg: python3")
     args = parser.parse_args()
     print('Commandline Options:', args)
 
@@ -19,8 +20,12 @@ try :
     startDate = datetime.datetime.strptime(args.start_date, '%Y-%m-%d')
     endDate = datetime.datetime.strptime(args.end_date, '%Y-%m-%d')
 
+    pythonV = "python"
+    if args.version :
+        pythonV = args.version
+
     while(startDate <= endDate) :
-        execList = ["python", args.file_path]
+        execList = [pythonV, args.file_path]
         execList = execList + ['-d' , startDate.strftime("%Y-%m-%d")]
         if args.force :
             execList = execList + ['-f']
