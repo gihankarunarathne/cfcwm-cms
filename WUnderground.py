@@ -62,9 +62,10 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         for t in myTimeseries :
             currTime = datetime.datetime.strptime(t[DateUTCIndex], '%Y-%m-%d %H:%M:%S')
             gap = currTime - prevTime
-            prec = t[HourlyPrecipMMIndex]
+            prec = float(t[HourlyPrecipMMIndex])
             if HourlyPrecipInchIndex > -1 :
                 prec = float(t[HourlyPrecipInchIndex]) * 25.4
+
             precipitationInGap = float(prec) * gap.seconds / 3600 # If rate per Hour given, calculate for interval
             # if precipitationInGap > 0 :
             #     print('\n', float(t[HourlyPrecipMMIndex]), precipitationInGap)
@@ -77,7 +78,7 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
         print('Temperature:: TemperatureC')
         newTimeseries = []
         for t in myTimeseries :
-            temp = t[TemperatureCIndex]
+            temp = float(t[TemperatureCIndex])
             if TemperatureFIndex > -1 :
                 temp = (float(t[TemperatureFIndex]) - 32) * 5 / 9
             newTimeseries.append([t[DateUTCIndex], temp])
@@ -85,12 +86,51 @@ def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) 
 
     def default(myTimeseries):
         print('default')
+        return []
 
     variableDict = {
         'Precipitation': Precipitation,
         'Temperature': Temperature,
     }
     return variableDict.get(variable, default)(timeseries)
+    # --END extractSingleTimeseries --
+
+def validateTimeseries(timeseries, variable, validation={'max_value': 1000, 'min_value': 0}) :
+    '''
+    Validate Timeseries against given rules
+    '''
+    MISSING_VALUE = -999
+    MAX_VALUE = float(validation.get('max_value'))
+    MIN_VALUE = float(validation.get('min_value'))
+    def Precipitation(myTimeseries) :
+        print('Precipitation:: Validation')
+        newTimeseries = []
+        for t in myTimeseries :
+            if MIN_VALUE <= t[1] and t[1] <= MAX_VALUE :
+                newTimeseries.append(t)
+            else :
+                newTimeseries.append([t[0], MISSING_VALUE])
+        return newTimeseries
+
+    def Temperature(myTimeseries) :
+        print('Precipitation:: Validation')
+        newTimeseries = []
+        for t in myTimeseries :
+            if MIN_VALUE <= t[1] and t[1] <= MAX_VALUE :
+                newTimeseries.append(t)
+            else :
+                newTimeseries.append([t[0], MISSING_VALUE])
+        return newTimeseries
+
+    def default(myTimeseries) :
+        print('default validation')
+        return []
+
+    validationDict = {
+        'Precipitation': Precipitation,
+        'Temperature': Temperature,
+    }
+    return validationDict.get(variable, default)(timeseries)
     # --END extractSingleTimeseries --
 
 try:
@@ -186,6 +226,8 @@ try:
 
         variables = station['variables']
         units = station['units']
+        max_values = station['max_values']
+        min_values = station['min_values']
         if 'run_name' in station :
             meta['name'] = station['run_name']
         for i in range(0, len(variables)) :
@@ -212,8 +254,13 @@ try:
                     print('\n')
                     continue
 
-            newTimeseries = extractSigleTimeseries(timeseries, variables[i], {'WUndergroundMeta': WUndergroundMeta})
-            # print(newTimeseries)
+            extractedTimeseries = extractSigleTimeseries(timeseries, variables[i], {'WUndergroundMeta': WUndergroundMeta})
+            validationObj = {
+                'max_value': max_values[i],
+                'min_value': min_values[i],
+            }
+            newTimeseries = validateTimeseries(extractedTimeseries, variables[i], validationObj)
+            # print(newTimeseries[:20])
             # continue
 
             for l in newTimeseries[:3] + newTimeseries[-2:] :
