@@ -1,0 +1,23 @@
+{
+    "stations": [
+        {
+            "stationId"     : "Hanwella",
+            "data_location" : {
+                "type"          : "file",
+                "location"      : "../data/2017MayFloodPrecip/hanwella.csv",
+                "file_type"     : "csv",
+                "metadata_lines": 1,
+                "timestamp_format": "%Y/%m/%d %H:%M:%S",
+                "utc_offset"    : "+00:05:30"
+            },
+            "name"          : "Parliment Lake",
+            "run_name"      : "Parliment Lake",
+            "source"        : "WaterLevelGuage",
+            "type"          : "Observed",
+            "variables"     : ["Discharge"],
+            "units"         : ["m3/s"],
+            "max_values"    : ["120"],
+            "min_values"    : ["0"]
+        }
+    ]
+}
