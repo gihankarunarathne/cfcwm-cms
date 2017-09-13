@@ -9,7 +9,7 @@
             "units": ["mm", "oC"],
             "max_values": ["120", "40"],
             "min_values": ["0", "0"],
-            "run_name": "Battaramulla"
+            "run_name": "Baththaramulla"
         }, {
             "stationId": "IBATTARA3",
             "name": "IBATTARA3",
@@ -19,7 +19,7 @@
             "units": ["mm", "oC"],
             "max_values": ["120", "40"],
             "min_values": ["0", "0"],
-            "run_name": "Battaramulla"
+            "run_name": "Baththaramulla"
         }, {
             "stationId": "IBATTARA4",
             "name": "IBATTARA4",
@@ -29,7 +29,7 @@
             "units": ["mm", "oC"],
             "max_values": ["120", "40"],
             "min_values": ["0", "0"],
-            "run_name": "Battaramulla"
+            "run_name": "Baththaramulla"
         }, {
             "stationId": "IWESTERN681",
             "name": "Isurupaya",
