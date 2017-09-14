@@ -8,14 +8,15 @@
                 "file_type"     : "csv",
                 "metadata_lines": 1,
                 "timestamp_format": "%Y/%m/%d %H:%M:%S",
-                "utc_offset"    : "+00:05:30"
+                "utc_offset"    : "+00:05:30",
+                "values"        : ["Timestamp", "Precipitation"]
             },
-            "name"          : "Parliment Lake",
-            "run_name"      : "Parliment Lake",
-            "source"        : "WaterLevelGuage",
+            "name"          : "Hanwella",
+            "run_name"      : "2017 May Flood",
+            "source"        : "WeatherStation",
             "type"          : "Observed",
-            "variables"     : ["Discharge"],
-            "units"         : ["m3/s"],
+            "variables"     : ["Precipitation"],
+            "units"         : ["mm"],
             "max_values"    : ["120"],
             "min_values"    : ["0"]
         }
