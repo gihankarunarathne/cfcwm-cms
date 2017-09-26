@@ -4,11 +4,11 @@
             "stationId"     : "Hanwella",
             "data_location" : {
                 "type"          : "file",
-                "location"      : "../data/2017MayFloodPrecip/hanwella.csv",
+                "location"      : "../events/2017MayFloodPrecip/hanwella_test.csv",
                 "file_type"     : "csv",
                 "metadata_lines": 1,
                 "timestamp_format": "%Y/%m/%d %H:%M:%S",
-                "utc_offset"    : "+00:05:30",
+                "utc_offset"    : "+05:30:00",
                 "values"        : ["Timestamp", "Precipitation"]
             },
             "name"          : "Hanwella",

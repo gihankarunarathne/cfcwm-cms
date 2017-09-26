@@ -1,6 +1,3 @@
-INSERT INTO curw.source VALUES 
-  (6, 'WeatherStation');
-
 INSERT INTO curw.station (`id`, `name`, `latitude`, `longitude`)
 VALUES
   (20, 'IBATTARA2', 6.89, 79.86),
