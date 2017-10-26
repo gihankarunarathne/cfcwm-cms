@@ -32,7 +32,7 @@ def getTimeseries(BASE_URL, station, date) :
     # print('>>>> >>>')
     # print(timeseries)
     return timeseries
-    # --END getTimeseries --
+    # --END get_timeseries --
 
 def extractSigleTimeseries(timeseries, variable, opts={'WUndergroundMeta': []}) :
     '''
