@@ -1,4 +1,4 @@
-def validate_timeseries(timeseries, variable=None, validation=None):
+def validate_timeseries(timeseries, validation=None):
     """
     Validate Timeseries against given rules
     """

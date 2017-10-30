@@ -2,7 +2,8 @@ import sys
 import datetime
 import json
 import os
-import logging, logging.config
+import logging
+import logging.config
 import traceback
 from glob import glob
 from os.path import join as pjoin

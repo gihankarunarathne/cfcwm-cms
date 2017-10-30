@@ -2,7 +2,8 @@ import sys
 import datetime
 import json
 import os
-import logging, logging.config
+import logging
+import logging.config
 import traceback
 from glob import glob
 from os.path import join as pjoin
@@ -11,10 +12,10 @@ import unittest2 as unittest
 from curwmysqladapter import MySQLAdapter
 
 sys.path.insert(0, '../../obs_virtual')
-from observation.obs_virtual.ObsVirtual import create_klb_timeseries, create_kub_timeseries
+from observation.obs_processed_data.ObsProcessedData import create_processed_timeseries
 
 
-class ObsVirtualTest(unittest.TestCase):
+class ObsProcessedDataTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
@@ -57,11 +58,16 @@ class ObsVirtualTest(unittest.TestCase):
     def tearDown(self):
         self.logger.info('tearDown')
 
-    def test_createKUBForLastHour(self):
-        self.logger.info('createKUBForLastHour')
+    def test_createProcessedDataForLastHour(self):
+        self.logger.info('createRawDataForLastHour')
+        OBS_CONFIG = "../../config/StationConfig.json"
+        CON_DATA = json.loads(open(OBS_CONFIG).read())
+        stations = CON_DATA['stations']
+        self.logger.debug('stations %s', stations)
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
+        opts = dict(forceInsert=False)
 
-        create_kub_timeseries()
+        create_processed_timeseries(self.adapter, stations, duration, opts)
 
-    def test_createKLBForLastHour(self):
-        self.logger.info('createKLBForLastHour')
-        create_klb_timeseries()
