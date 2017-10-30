@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys, traceback, csv, json, datetime, getopt, os, copy, requests
-from curwmysqladapter import mysqladapter
+from curwmysqladapter import MySQLAdapter
 
 def usage() :
     usageText = """
@@ -133,6 +133,8 @@ def validateTimeseries(timeseries, variable, validation={'max_value': 1000, 'min
     return validationDict.get(variable, default)(timeseries)
     # --END extractSingleTimeseries --
 
+
+INIT_DIR = './'
 try:
     INIT_DIR = os.getcwd()
     ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -183,11 +185,11 @@ try:
 
     # Default run for current day
     now = datetime.datetime.now()
-    if date :
+    if date:
         now = datetime.datetime.strptime(date, '%Y-%m-%d')
 
     print('WUnderground data extraction:', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'on', ROOT_DIR)
-    if forceInsert :
+    if forceInsert:
         print('WARNING: Force Insert enabled')
 
     WU_DATA = json.loads(open(WU_CONFIG).read())
@@ -202,11 +204,11 @@ try:
         'source': 'WeatherStation',
         'name': 'WUnderground',
     }
-    adapter = mysqladapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
+    adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
 
     for station in stations :
         print('station:', station)
-        WUndergroundMeta, *timeseries = getTimeseries(BASE_URL, station['stationId'], now) # List Destructuring
+        WUndergroundMeta, *timeseries = getTimeseries(BASE_URL, station['stationId'], now)  # List Destructuring
         DateUTCIndex = WUndergroundMeta.index('DateUTC')
 
         if(len(timeseries) < 1): 
@@ -233,9 +235,9 @@ try:
         for i in range(0, len(variables)) :
             meta['variable'] = variables[i]
             meta['unit'] = units[i]
-            eventId = adapter.getEventId(meta)
+            eventId = adapter.get_event_id(meta)
             if eventId is None :
-                eventId = adapter.createEventId(meta)
+                eventId = adapter.create_event_id(meta)
                 print('HASH SHA256 created: ', eventId)
             else :
                 print('HASH SHA256 exists: ', eventId)
@@ -243,13 +245,13 @@ try:
                 metaQuery['station'] = station['name']
                 metaQuery['variable'] = variables[i]
                 metaQuery['unit'] = units[i]
-                if 'run_name' in station :
+                if 'run_name' in station:
                     metaQuery['name'] = station['run_name']
                 opts = {
                     'from': startDateTime.strftime("%Y-%m-%d %H:%M:%S"),
                     'to': endDateTime.strftime("%Y-%m-%d %H:%M:%S")
                 }
-                existingTimeseries = adapter.retrieveTimeseries(metaQuery, opts)
+                existingTimeseries = adapter.retrieve_timeseries(metaQuery, opts)
                 if len(existingTimeseries[0]['timeseries']) > 0 and not forceInsert:
                     print('\n')
                     continue
@@ -266,7 +268,7 @@ try:
             for l in newTimeseries[:3] + newTimeseries[-2:] :
                 print(l)
 
-            rowCount = adapter.insertTimeseries(eventId, newTimeseries, forceInsert)
+            rowCount = adapter.insert_timeseries(eventId, newTimeseries, forceInsert)
             print('%s rows inserted.\n' % rowCount)
 
 
