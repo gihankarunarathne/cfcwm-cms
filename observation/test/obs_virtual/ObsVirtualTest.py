@@ -64,4 +64,13 @@ class ObsVirtualTest(unittest.TestCase):
 
     def test_createKLBForLastHour(self):
         self.logger.info('createKLBForLastHour')
-        create_klb_timeseries()
+        OBS_CONFIG = "../../config/StationConfig.json"
+        CON_DATA = json.loads(open(OBS_CONFIG).read())
+        stations = CON_DATA['stations']
+        self.logger.debug('stations %s', stations)
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
+        opts = dict(forceInsert=True)
+
+        create_klb_timeseries(self.adapter, stations, duration, opts)
