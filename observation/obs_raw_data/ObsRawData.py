@@ -130,7 +130,7 @@ def create_raw_timeseries(adapter, stations, duration, opts):
         DateUTCIndex = WUndergroundMeta.index('DateUTC')
 
         if len(timeseries) < 1:
-            print('INFO: Timeseries doesn\'t have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
+            print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
             continue
 
         print(timeseries)

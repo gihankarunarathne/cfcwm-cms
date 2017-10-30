@@ -11,7 +11,7 @@ def validate_timeseries(timeseries, validation=None):
 
     newTimeseries = []
     for t in timeseries:
-        if MIN_VALUE <= t[1] and t[1] <= MAX_VALUE:
+        if MIN_VALUE <= t[1] <= MAX_VALUE:
             newTimeseries.append(t)
         else:
             newTimeseries.append([t[0], MISSING_VALUE])

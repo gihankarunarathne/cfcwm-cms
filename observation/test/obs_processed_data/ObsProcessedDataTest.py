@@ -1,21 +1,21 @@
-import sys
 import datetime
 import json
 import os
 import logging
 import logging.config
 import traceback
-from glob import glob
 from os.path import join as pjoin
 
 import unittest2 as unittest
 from curwmysqladapter import MySQLAdapter
 
-sys.path.insert(0, '../../obs_virtual')
+# sys.path.insert(0, '../../obs_virtual')
 from observation.obs_processed_data.ObsProcessedData import create_processed_timeseries
 
 
 class ObsProcessedDataTest(unittest.TestCase):
+    logger = None
+
     @classmethod
     def setUpClass(cls):
         try:
@@ -49,8 +49,8 @@ class ObsProcessedDataTest(unittest.TestCase):
             traceback.print_exc()
 
     @classmethod
-    def tearDownClass(self):
-        self.logger.info('tearDownClass')
+    def tearDownClass(cls):
+        cls.logger.info('tearDownClass')
 
     def setUp(self):
         self.logger.info('setUp')
@@ -70,4 +70,3 @@ class ObsProcessedDataTest(unittest.TestCase):
         opts = dict(forceInsert=False)
 
         create_processed_timeseries(self.adapter, stations, duration, opts)
-
