@@ -2,7 +2,7 @@
 
 import sys, traceback, csv, json, datetime, getopt, os, copy, requests, argparse
 
-from curwmysqladapter import mysqladapter
+from curwmysqladapter import MySQLAdapter
 from .LibContinousTimeseries import getTimeseries
 from .LibContinousTimeseries import extractSigleTimeseries
 from .LibContinousValidation import validateTimeseries
@@ -62,7 +62,7 @@ try:
         'source': '',
         'name': '',
     }
-    adapter = mysqladapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
+    adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
 
     for station in stations :
         print('station:', station)
@@ -100,9 +100,9 @@ try:
             meta['variable'] = variables[i]
             meta['unit'] = units[i]
             print('meta', meta)
-            eventId = adapter.getEventId(meta)
+            eventId = adapter.get_event_id(meta)
             if eventId is None :
-                eventId = adapter.createEventId(meta)
+                eventId = adapter.create_event_id(meta)
                 print('HASH SHA256 created: ', eventId)
             else :
                 print('HASH SHA256 exists: ', eventId)
@@ -119,7 +119,7 @@ try:
                     'to': endDateTime.strftime(COMMON_DATE_FORMAT)
                 }
                 print('metaQuery', metaQuery)
-                existingTimeseries = adapter.retrieveTimeseries(metaQuery, opts)
+                existingTimeseries = adapter.retrieve_timeseries(metaQuery, opts)
                 if len(existingTimeseries[0]['timeseries']) > 0 and not forceInsert:
                     print('Timeseries already exists. User --force to update the existing.\n')
                     continue
@@ -137,7 +137,7 @@ try:
             for l in newTimeseries[:3] + newTimeseries[-2:] :
                 print(l)
 
-            rowCount = adapter.insertTimeseries(eventId, newTimeseries, forceInsert)
+            rowCount = adapter.insert_timeseries(eventId, newTimeseries, forceInsert)
             print('%s rows inserted.\n' % rowCount)
 
 
