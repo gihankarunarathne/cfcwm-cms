@@ -59,6 +59,7 @@ class ObsVirtualTest(unittest.TestCase):
 
     def test_createKUBForLastHour(self):
         self.logger.info('createKUBForLastHour')
+
         create_kub_timeseries()
 
     def test_createKLBForLastHour(self):
