@@ -1,29 +1,26 @@
 import datetime
 import json
-import os
 import logging
 import logging.config
+import os
 import traceback
 from os.path import join as pjoin
 
 import unittest2 as unittest
 from curwmysqladapter import MySQLAdapter
 
-# sys.path.insert(0, '../../obs_virtual')
-from observation.obs_processed_data.ObsProcessedData import create_processed_timeseries
+from observation.obs_raw_data.ObsRawData import create_raw_timeseries
 
 
-class ObsProcessedDataTest(unittest.TestCase):
-    logger = None
-
+class ObsRawDataTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            root_dir = os.path.dirname(os.path.realpath(__file__))
-            config = json.loads(open(pjoin(root_dir, '../../config/CONFIG.json')).read())
+            cls.root_dir = os.path.dirname(os.path.realpath(__file__))
+            config = json.loads(open(pjoin(cls.root_dir, '../../config/CONFIG.json')).read())
 
             # Initialize Logger
-            logging_config = json.loads(open(pjoin(root_dir, '../../config/LOGGING_CONFIG.json')).read())
+            logging_config = json.loads(open(pjoin(cls.root_dir, '../../config/LOGGING_CONFIG.json')).read())
             logging.config.dictConfig(logging_config)
             cls.logger = logging.getLogger('MySQLAdapterTest')
             cls.logger.addHandler(logging.StreamHandler())
@@ -49,8 +46,8 @@ class ObsProcessedDataTest(unittest.TestCase):
             traceback.print_exc()
 
     @classmethod
-    def tearDownClass(cls):
-        cls.logger.info('tearDownClass')
+    def tearDownClass(self):
+        self.logger.info('tearDownClass')
 
     def setUp(self):
         self.logger.info('setUp')
@@ -58,9 +55,9 @@ class ObsProcessedDataTest(unittest.TestCase):
     def tearDown(self):
         self.logger.info('tearDown')
 
-    def test_createProcessedDataForLastHour(self):
+    def test_createRawDataForLastHour(self):
         self.logger.info('createRawDataForLastHour')
-        OBS_CONFIG = "../../config/StationConfig.json"
+        OBS_CONFIG = pjoin(self.root_dir, "../../config/StationConfig.json")
         CON_DATA = json.loads(open(OBS_CONFIG).read())
         stations = CON_DATA['stations']
         self.logger.debug('stations %s', stations)
@@ -69,4 +66,4 @@ class ObsProcessedDataTest(unittest.TestCase):
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
         opts = dict(forceInsert=False)
 
-        create_processed_timeseries(self.adapter, stations, duration, opts)
+        create_raw_timeseries(self.adapter, stations, duration, opts)
