@@ -1,13 +1,18 @@
 import tempfile
 import os
 import logging
+import sys
 import copy
 from datetime import datetime
+from os.path import join as pjoin
 from collections import OrderedDict
-from ..resource import ResourceManager
+
+from shapely.geometry import Point
+
 from curw.rainfall.wrf.extraction.spatial_utils import get_voronoi_polygons
 from curwmysqladapter import Data, Station
-from lib.UtilValidation import timeseries_availability
+from cms_utils.UtilValidation import timeseries_availability
+from observation.resource import ResourceManager
 
 
 def create_kub_timeseries(adapter, stations, duration, opts):
@@ -84,7 +89,12 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             if is_available:
                 points[station['name']] = [is_station_exists['longitude'], is_station_exists['latitude']]
                 points_timeseries[station['name']] = station_timeseries
+        # -- END Getting data from stations
 
+        if len(points.keys()) > 0:
+            logging.warning("No data found on station for given period of time. Abort...")
+            print("No data found on station for given period of time. Abort...")
+            continue
         # -- Create thiessen polygon
         shp = ResourceManager.get_resource_path('shp/kelani-upper-basin/kelani-upper-basin.shp')
         out = tempfile.mkdtemp(prefix='voronoi_')
@@ -223,7 +233,12 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             if is_available:
                 points[station['name']] = [is_station_exists['longitude'], is_station_exists['latitude']]
                 points_timeseries[station['name']] = station_timeseries
+        # -- END Getting data from stations
 
+        if len(points.keys()) > 0:
+            logging.warning("No data found on station for given period of time. Abort...")
+            print("No data found on station for given period of time. Abort...")
+            continue
         # -- Create thiessen polygon
         shp = ResourceManager.get_resource_path('shp/klb-wgs84/klb-wgs84.shp')
         out = tempfile.mkdtemp(prefix='voronoi_')
@@ -237,6 +252,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 thiessen_dict[row[1][0]] = row[1][3]
             elif row[1][0] is '__total_area__':
                 total_area = row[1][3]
+        # Point(2,3).contains(shape)
 
         if total_area is 0.0:
             logging.warning('Total Area can not be 0.0')

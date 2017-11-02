@@ -1,8 +1,8 @@
 import copy
 import logging
 
-from lib.UtilValidation import validate_timeseries
 from curwmysqladapter import Data
+from cms_utils.UtilValidation import validate_timeseries
 # from ..config import Constants as con
 
 

@@ -1,18 +1,17 @@
 #!/usr/bin/python3
 
-import sys
-import traceback
-import json
-from datetime import datetime
-import os
 import argparse
+import json
+import os
+import traceback
+from datetime import datetime
 
 from curwmysqladapter import MySQLAdapter
 
-from .obs_virtual import create_klb_timeseries, create_kub_timeseries
-from observation.obs_raw_data import ObsRawData
-from observation.obs_processed_data import ObsProcessedData
 from observation.config import Constants as C
+from observation.obs_processed_data import ObsProcessedData
+from observation.obs_raw_data import ObsRawData
+from observation.obs_virtual import ObsVirtual
 
 try:
     INIT_DIR = os.getcwd()
@@ -49,7 +48,9 @@ try:
     parser.add_argument("--end-time", help="End Time in HH:MM:SS.")
     parser.add_argument("-c", "--config", help="Configuration file of timeseries. Default is ./OBS_CONFIG.json.")
     parser.add_argument("-f", "--force", action="store_true", help="Force insert.")
-    parser.add_argument("-m", "--mode", help="One of 'raw' | 'processed' | 'virtual'")
+    parser.add_argument("-m", "--mode", choices=['raw', 'processed', 'virtual', 'virtual_kub', 'virtual_klb'],
+                        default='raw', type=str,
+                        help="One of 'raw' | 'processed' | 'virtual' | 'virtual_kub' | 'virtual_klb'. Default is 'raw'")
     args = parser.parse_args()
     print('Commandline Options:', args)
 
@@ -78,15 +79,20 @@ try:
 
     adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
 
+
     def create_virtual_timeseries(my_adapter, my_stations, my_duration, my_opts):
-        # ObsVirtual.create_kub_timeseries(my_adapter, my_stations, my_duration, my_opts)
-        create_klb_timeseries(my_adapter, my_stations, my_duration, my_opts)
+        ObsVirtual.create_kub_timeseries(my_adapter, my_stations, my_duration, my_opts)
+        ObsVirtual.create_klb_timeseries(my_adapter, my_stations, my_duration, my_opts)
+
 
     modeDict = {
         'raw': ObsRawData.create_raw_timeseries,
         'processed': ObsProcessedData.create_processed_timeseries,
+        'virtual_kub': ObsVirtual.create_kub_timeseries,
+        'virtual_klb': ObsVirtual.create_klb_timeseries,
         'virtual': create_virtual_timeseries
     }
+
 
     def default():
         print('default mode')
