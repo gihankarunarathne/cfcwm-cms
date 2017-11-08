@@ -73,5 +73,6 @@ def create_processed_timeseries(adapter, stations, duration, opts):
             for l in validatedTimeseries[:3] + validatedTimeseries[-2:]:
                 print(l)
 
-            rowCount = adapter.insert_timeseries(eventId, validatedTimeseries, force_insert, new_opts)
+            rowCount = \
+                adapter.insert_timeseries(eventId, validatedTimeseries, upsert=force_insert, mode=Data.processed_data)
             print('%s rows inserted.\n' % rowCount)
