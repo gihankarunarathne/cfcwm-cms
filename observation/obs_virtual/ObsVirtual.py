@@ -1,18 +1,25 @@
-import tempfile
-import os
-import logging
-import sys
 import copy
-from datetime import datetime
-from os.path import join as pjoin
+import logging
+import os
+import tempfile
 from collections import OrderedDict
+from datetime import datetime
 
-from shapely.geometry import Point
-
+import geopandas as gpd
 from curw.rainfall.wrf.extraction.spatial_utils import get_voronoi_polygons
 from curwmysqladapter import Data, Station
+from shapely.geometry import Point
+
 from cms_utils.UtilValidation import timeseries_availability
 from observation.resource import ResourceManager
+
+
+def get_basin_shape(shape_file):
+    shape_attribute = ['OBJECTID', 1]
+
+    shape_df = gpd.GeoDataFrame.from_file(shape_file)
+    shape_polygon_idx = shape_df.index[shape_df[shape_attribute[0]] == shape_attribute[1]][0]
+    return shape_df['geometry'][shape_polygon_idx]
 
 
 def create_kub_timeseries(adapter, stations, duration, opts):
@@ -42,12 +49,21 @@ def create_kub_timeseries(adapter, stations, duration, opts):
         points = {}
         points_timeseries = {}
 
+        # Get KUB basin shape file for checking weather station reside within it
+        shp = ResourceManager.get_resource_path('shp/kelani-upper-basin/kelani-upper-basin.shp')
+        shape_polygon = get_basin_shape(shp)
+
         for station in stations:
             print('station:', station)
             #  Check whether station exists
             is_station_exists = adapter.get_station({'name': station['name']})
             if is_station_exists is None:
-                logging.warning('Station %s does not exists. Continue with others', station['name'])
+                logging.warning('Station %s does not exists. Continue with others.', station['name'])
+                continue
+
+            # Check whether station reside within the basin
+            if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
+                logging.warning('Station %s does not contains inside KUB. Continue with others', station['name'])
                 continue
 
             meta['station'] = station['name']
@@ -57,7 +73,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             # -- Get Processed Timeseries for this station
             event_id = adapter.get_event_id(meta)
             if event_id is None:
-                logging.warning('Event Id %s does not exists. Continue with others', event_id)
+                logging.warning('Event Id for %s does not exists. Continue with others', station['name'])
                 continue
 
             opts = {
@@ -91,19 +107,16 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 points_timeseries[station['name']] = station_timeseries
         # -- END Getting data from stations
 
-        if len(points.keys()) > 0:
-            logging.warning("No data found on station for given period of time. Abort...")
-            print("No data found on station for given period of time. Abort...")
+        if len(points) < 1:
+            logging.warning("No station data found for given period of time. Abort...")
             continue
         # -- Create thiessen polygon
-        shp = ResourceManager.get_resource_path('shp/kelani-upper-basin/kelani-upper-basin.shp')
         out = tempfile.mkdtemp(prefix='voronoi_')
         result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
         print(result)
         thiessen_dict = {}
         total_area = 0.0
         for row in result.iterrows():
-            print('fdfd', row[1][0], row[1][3])
             if row[1][0] is not '__total_area__':
                 thiessen_dict[row[1][0]] = row[1][3]
             elif row[1][0] is '__total_area__':
@@ -148,14 +161,16 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             print('HASH SHA256 exists: ', klb_event_id)
             opts = {
                 'from': start_date_time.strftime("%Y-%m-%d %H:%M:%S"),
-                'to': end_date_time.strftime("%Y-%m-%d %H:%M:%S")
+                'to': end_date_time.strftime("%Y-%m-%d %H:%M:%S"),
+                'mode': Data.processed_data,
             }
             existingTimeseries = adapter.retrieve_timeseries(metaKUB, opts)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
                 print('\n')
                 continue
 
-        rowCount = adapter.insert_timeseries(klb_event_id, kub_timeseries, force_insert)
+        rowCount = \
+            adapter.insert_timeseries(klb_event_id, kub_timeseries, upsert=force_insert, mode=Data.processed_data)
         print('%s rows inserted.\n' % rowCount)
 
 
@@ -186,12 +201,21 @@ def create_klb_timeseries(adapter, stations, duration, opts):
         points = {}
         points_timeseries = {}
 
+        # Get KUB basin shape file for checking weather station reside within it
+        shp = ResourceManager.get_resource_path('shp/klb-wgs84/klb-wgs84.shp')
+        shape_polygon = get_basin_shape(shp)
+
         for station in stations:
             print('station:', station)
             #  Check whether station exists
             is_station_exists = adapter.get_station({'name': station['name']})
             if is_station_exists is None:
                 logging.warning('Station %s does not exists. Continue with others', station['name'])
+                continue
+
+            # Check whether station reside within the basin
+            if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
+                logging.warning('Station %s does not contains inside KLB. Continue with others', station['name'])
                 continue
 
             meta['station'] = station['name']
@@ -201,7 +225,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             # -- Get Processed Timeseries for this station
             event_id = adapter.get_event_id(meta)
             if event_id is None:
-                logging.warning('Event Id %s does not exists. Continue with others', event_id)
+                logging.warning('Event Id for %s does not exists. Continue with others', station['name'])
                 continue
 
             opts = {
@@ -235,24 +259,20 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 points_timeseries[station['name']] = station_timeseries
         # -- END Getting data from stations
 
-        if len(points.keys()) > 0:
-            logging.warning("No data found on station for given period of time. Abort...")
-            print("No data found on station for given period of time. Abort...")
+        if len(points) < 1:
+            logging.warning("No station data found for given period of time. Abort...")
             continue
         # -- Create thiessen polygon
-        shp = ResourceManager.get_resource_path('shp/klb-wgs84/klb-wgs84.shp')
         out = tempfile.mkdtemp(prefix='voronoi_')
         result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
         print(result)
         thiessen_dict = {}
         total_area = 0.0
         for row in result.iterrows():
-            print('fdfd', row[1][0], row[1][3])
             if row[1][0] is not '__total_area__':
                 thiessen_dict[row[1][0]] = row[1][3]
             elif row[1][0] is '__total_area__':
                 total_area = row[1][3]
-        # Point(2,3).contains(shape)
 
         if total_area is 0.0:
             logging.warning('Total Area can not be 0.0')
@@ -293,12 +313,14 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             print('HASH SHA256 exists: ', klb_event_id)
             opts = {
                 'from': start_date_time.strftime("%Y-%m-%d %H:%M:%S"),
-                'to': end_date_time.strftime("%Y-%m-%d %H:%M:%S")
+                'to': end_date_time.strftime("%Y-%m-%d %H:%M:%S"),
+                'mode': Data.processed_data,
             }
             existingTimeseries = adapter.retrieve_timeseries(metaKLB, opts)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
                 print('\n')
                 continue
 
-        rowCount = adapter.insert_timeseries(klb_event_id, klb_timeseries, force_insert)
+        rowCount = \
+            adapter.insert_timeseries(klb_event_id, klb_timeseries, upsert=force_insert, mode=Data.processed_data)
         print('%s rows inserted.\n' % rowCount)
