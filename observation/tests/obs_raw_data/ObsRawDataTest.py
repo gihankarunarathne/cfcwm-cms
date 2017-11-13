@@ -9,7 +9,7 @@ from os.path import join as pjoin
 import unittest2 as unittest
 from curwmysqladapter import MySQLAdapter
 
-from observation.obs_raw_data.ObsRawData import create_raw_timeseries
+from observation.obs_raw_data.ObsRawData import create_raw_timeseries, get_dialog_timeseries, get_wu_timeseries
 
 
 class ObsRawDataTest(unittest.TestCase):
@@ -46,8 +46,8 @@ class ObsRawDataTest(unittest.TestCase):
             traceback.print_exc()
 
     @classmethod
-    def tearDownClass(self):
-        self.logger.info('tearDownClass')
+    def tearDownClass(cls):
+        cls.logger.info('tearDownClass')
 
     def setUp(self):
         self.logger.info('setUp')
@@ -67,3 +67,15 @@ class ObsRawDataTest(unittest.TestCase):
         opts = dict(forceInsert=False)
 
         create_raw_timeseries(self.adapter, stations, duration, opts)
+
+    def test_getDialogTimeseries(self):
+        self.logger.info('getDialogTimeseries')
+        dialog_timeseries = get_dialog_timeseries(station='3674010756837033')
+        print(dialog_timeseries)
+
+    def test_getWUndergroundTimeseries(self):
+        self.logger.info('getWUndergroundTimeseries')
+        BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
+        date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        wu_timeseries = get_wu_timeseries(base_url=BASE_URL, station='IBATTARA3', date=date_time)
+        print(wu_timeseries)

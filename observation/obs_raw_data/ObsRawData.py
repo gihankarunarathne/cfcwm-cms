@@ -1,10 +1,59 @@
 import requests
 import copy
+import json
+import os
 import logging
 from datetime import datetime
 
 
 # from ..config import Constants as con
+
+def get_weather_station_data_format():
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    return json.loads(open(os.path.join(script_path, './WeatherStation.json')).read())
+
+
+def get_dialog_timeseries(station):
+    # https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php?mac=3674010756837033&rows=5000
+    base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php'
+    payload = {
+        'mac': station,
+        'rows': 5
+    }
+    result = requests.get(base_url, params=payload, allow_redirects=False)
+    result = result.text.strip()
+    if result.startswith("<pre>") and result.endswith("</pre>"):
+        result = result[5:-6]
+
+    try:
+        result = json.loads(result)
+    except ValueError as e:
+        logging.error(e)
+        return []
+
+    result = result['response']['docs']
+    common_format = get_weather_station_data_format()
+    for key in common_format:
+        common_format[key] = None
+    timeseries = []
+    for item in result:
+        print(item)
+        # Mapping Response to common format
+        new_item = copy.deepcopy(common_format)
+        # -- DateUTC
+        if 'paramValue10_s' in item:
+            new_item['DateUTC'] = item['paramValue10_s']
+        # -- TemperatureC
+        if 'paramValue3_s' in item:
+            new_item['TemperatureC'] = item['paramValue3_s']
+        # -- PrecipitationMM
+        if 'paramValue8_s' in item:
+            new_item['PrecipitationMM'] = item['paramValue8_s']
+
+        timeseries.append(new_item)
+
+    return timeseries
+    # --END get_timeseries --
 
 
 def get_wu_timeseries(base_url, station, date):
@@ -17,13 +66,48 @@ def get_wu_timeseries(base_url, station, date):
     }
     r = requests.get(base_url, params=payload)
     lines = r.text.replace('<br>', '').split('\n')
-    timeseries = []
+
+    data_lines = []
     for line in lines:
         lineSplit = line.split(',')
         if len(lineSplit) > 1:
-            timeseries.append(lineSplit)
-    # print('>>>> >>>')
-    # print(timeseries)
+            data_lines.append(lineSplit)
+
+    WUndergroundMeta, *data = data_lines
+    common_format = get_weather_station_data_format()
+    for key in common_format:
+        common_format[key] = None
+
+    DateUTCIndex = WUndergroundMeta.index('DateUTC')
+    TemperatureCFactor = False
+    TemperatureCIndex = WUndergroundMeta.index('TemperatureC') if 'TemperatureC' in WUndergroundMeta else None
+    if TemperatureCIndex is None:
+        TemperatureCIndex = WUndergroundMeta.index('TemperatureF')
+        TemperatureCFactor = True
+    PrecipitationMMFactor = False
+    PrecipitationMMIndex = WUndergroundMeta.index('dailyrainMM') if 'dailyrainMM' in WUndergroundMeta else None
+    if PrecipitationMMIndex is None:
+        PrecipitationMMIndex = WUndergroundMeta.index('dailyrainInch')
+        PrecipitationMMFactor = True
+
+    timeseries = []
+    prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
+        if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
+    for line in data:
+        # Mapping Response to common format
+        new_item = copy.deepcopy(common_format)
+        # -- DateUTC
+        new_item['DateUTC'] = line[DateUTCIndex]
+        # -- TemperatureC
+        new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
+            if TemperatureCFactor else float(line[TemperatureCIndex])
+        # -- PrecipitationMM
+        new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
+            if PrecipitationMMFactor else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
+        prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
+            if PrecipitationMMFactor else float(line[PrecipitationMMIndex])
+
+        timeseries.append(new_item)
     return timeseries
     # --END get_timeseries --
 
