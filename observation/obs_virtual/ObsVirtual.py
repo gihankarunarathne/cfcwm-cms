@@ -16,6 +16,7 @@ from observation.resource import ResourceManager
 
 def get_basin_shape(shape_file):
     shape_attribute = ['OBJECTID', 1]
+    # tt = gpd.read_file(shape_file)['geometry'].area
 
     shape_df = gpd.GeoDataFrame.from_file(shape_file)
     shape_polygon_idx = shape_df.index[shape_df[shape_attribute[0]] == shape_attribute[1]][0]
@@ -75,6 +76,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             if event_id is None:
                 logging.warning('Event Id for %s does not exists. Continue with others', station['name'])
                 continue
+            logging.debug('%s : eventId is %s. Search with %s', station['name'], event_id, meta)
 
             opts = {
                 'from': start_date_time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -227,6 +229,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             if event_id is None:
                 logging.warning('Event Id for %s does not exists. Continue with others', station['name'])
                 continue
+            print('%s : eventId is %s. Search with %s' % (station['name'], event_id, meta))
 
             opts = {
                 'from': start_date_time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -263,6 +266,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             logging.warning("No station data found for given period of time. Abort...")
             continue
         # -- Create thiessen polygon
+        logging.debug("Create thiessen polygon using points: %s", points)
         out = tempfile.mkdtemp(prefix='voronoi_')
         result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
         print(result)
@@ -282,9 +286,11 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             thiessen_factor = thiessen_dict[t_station_name] / total_area
             for tt in points_timeseries.get(t_station_name, []):
                 key = tt[0].timestamp()
+                # If key doesn't contain in the dictionary, create new key
                 if key not in lower_thiessen_values:
                     lower_thiessen_values[key] = 0
-                    lower_thiessen_values[key] += float(tt[1]) * thiessen_factor
+                # Added to thiessen value at that timestamp
+                lower_thiessen_values[key] += float(tt[1]) * thiessen_factor
 
         # Iterate through each timestamp
         klb_timeseries = []
