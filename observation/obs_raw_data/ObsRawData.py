@@ -4,7 +4,7 @@ import json
 import os
 import logging
 from datetime import datetime
-
+from curwmysqladapter import Station
 
 # from ..config import Constants as con
 
@@ -45,7 +45,7 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
             new_item['DateUTC'] = item['paramValue10_s']
         # -- TemperatureC
         if 'paramValue3_s' in item:
-            new_item['TemperatureC'] = item['paramValue3_s']
+            new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
         # -- PrecipitationMM
         if 'paramValue8_s' in item:
             new_item['PrecipitationMM'] = item['paramValue8_s']
@@ -76,6 +76,10 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
             data_lines.append(lineSplit)
 
     WUndergroundMeta, *data = data_lines
+    if len(data) < 1:
+        logging.warning('Timeseries does not have any data for station: %s', station['name'])
+        return []
+
     common_format = get_weather_station_data_format()
     for key in common_format:
         common_format[key] = None
@@ -115,9 +119,9 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
 
 
 def get_timeseries(station, start_date, end_date):
-    if station['run_name'] is 'WUnderground':
+    if station['run_name'] == 'WUnderground':
         return get_wu_timeseries(station, start_date, end_date)
-    elif station['run_name'] is 'Dialog':
+    elif station['run_name'] == 'Dialog':
         return get_dialog_timeseries(station, start_date, end_date)
     else:
         logging.warning("Unknown host to retrieve the data %s", station['run_name'])
@@ -176,8 +180,18 @@ def create_raw_timeseries(adapter, stations, duration, opts):
         #  Check whether station exists
         is_station_exists = adapter.get_station({'name': station['name']})
         if is_station_exists is None:
-            logging.warning('Station %s does not exists. Continue with others', station['name'])
-            continue
+            logging.warning('Station %s does not exists.', station['name'])
+            if 'station_meta' in station:
+                station_meta = station['station_meta']
+                station_meta.insert(0, Station.CUrW)
+                row_count = adapter.create_station(station_meta)
+                if row_count > 0:
+                    logging.warning('Created new station %s', station_meta)
+                else:
+                    continue
+            else:
+                logging.warning('Continue with others', station['name'])
+                continue
 
         timeseries = get_timeseries(station, start_date_time, end_date_time)
 
@@ -186,10 +200,10 @@ def create_raw_timeseries(adapter, stations, duration, opts):
             continue
 
         print(timeseries)
-        print('Start Date :', timeseries[0][0])
-        print('End Date :', timeseries[-1][0])
-        startDateTime = datetime.strptime(timeseries[0][0], '%Y-%m-%d %H:%M:%S')
-        endDateTime = datetime.strptime(timeseries[-1][0], '%Y-%m-%d %H:%M:%S')
+        print('Start Date :', timeseries[0]['DateUTC'])
+        print('End Date :', timeseries[-1]['DateUTC'])
+        startDateTime = datetime.strptime(timeseries[0]['DateUTC'], '%Y-%m-%d %H:%M:%S')
+        endDateTime = datetime.strptime(timeseries[-1]['DateUTC'], '%Y-%m-%d %H:%M:%S')
         print(timeseries[:3])
         # continue;
 

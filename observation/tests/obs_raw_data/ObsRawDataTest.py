@@ -12,7 +12,8 @@ from curwmysqladapter import MySQLAdapter
 from observation.obs_raw_data.ObsRawData import \
     get_dialog_timeseries, \
     get_wu_timeseries, \
-    extract_single_variable_timeseries
+    extract_single_variable_timeseries, \
+    create_raw_timeseries
 
 
 class ObsRawDataTest(unittest.TestCase):

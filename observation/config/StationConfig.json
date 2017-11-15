@@ -102,7 +102,7 @@
         }, {
             "stationId": "3674010756837033",
             "name": "Hingurana",
-            "station_meta": ["curw_hingurana", "Hingurana", 6.927718, 80.339619, 0, "Hingurana Station"],
+            "station_meta": ["curw_hingurana", "Hingurana", 6.904552, 80.407895, 0, "Hingurana Station"],
             "source": "WeatherStation",
             "type": "Observed",
             "variables": ["Precipitation", "Temperature"],
