@@ -13,11 +13,11 @@ def get_weather_station_data_format():
     return json.loads(open(os.path.join(script_path, './WeatherStation.json')).read())
 
 
-def get_dialog_timeseries(station):
+def get_dialog_timeseries(station, start_date_time, end_date_time):
     # https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php?mac=3674010756837033&rows=5000
     base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php'
     payload = {
-        'mac': station,
+        'mac': station['stationId'],
         'rows': 5
     }
     result = requests.get(base_url, params=payload, allow_redirects=False)
@@ -56,12 +56,14 @@ def get_dialog_timeseries(station):
     # --END get_timeseries --
 
 
-def get_wu_timeseries(base_url, station, date):
+def get_wu_timeseries(station, start_date_time, end_date_time):
+    #  'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
+    base_url = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
     payload = {
-        'ID': station,
-        'day': date.day,
-        'month': date.month,
-        'year': date.year,
+        'ID': station['stationId'],
+        'day': end_date_time.day,
+        'month': end_date_time.month,
+        'year': end_date_time.year,
         'format': 1
     }
     r = requests.get(base_url, params=payload)
@@ -112,65 +114,35 @@ def get_wu_timeseries(base_url, station, date):
     # --END get_timeseries --
 
 
+def get_timeseries(station, start_date, end_date):
+    if station['run_name'] is 'WUnderground':
+        return get_wu_timeseries(station, start_date, end_date)
+    elif station['run_name'] is 'Dialog':
+        return get_dialog_timeseries(station, start_date, end_date)
+    else:
+        logging.warning("Unknown host to retrieve the data %s", station['run_name'])
+        return []
+
+
 def extract_single_variable_timeseries(timeseries, variable, opts=None):
     """
-    WUnderground Meta Data structure (1st row)
-    [
-        'Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH',
-        'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM',
-        'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC'
-    ]
     Then Lines follows the data. This function will extract the given variable timeseries
     """
     if opts is None:
-        opts = {'WUndergroundMeta': []}
-    WUndergroundMeta = opts.get('WUndergroundMeta', [
-        'Time', 'TemperatureC', 'DewpointC', 'PressurehPa', 'WindDirection', 'WindDirectionDegrees', 'WindSpeedKMH',
-        'WindSpeedGustKMH', 'Humidity', 'HourlyPrecipMM', 'Conditions', 'Clouds', 'dailyrainMM',
-        'SolarRadiationWatts/m^2', 'SoftwareType', 'DateUTC'
-    ])
-
-    DateUTCIndex = WUndergroundMeta.index('DateUTC')
-    TemperatureCIndex = 1
-    TemperatureFIndex = -1
-    if 'TemperatureC' in WUndergroundMeta:
-        TemperatureCIndex = WUndergroundMeta.index('TemperatureC')
-    if 'TemperatureF' in WUndergroundMeta:
-        TemperatureFIndex = WUndergroundMeta.index('TemperatureF')
-    HourlyPrecipMMIndex = 9
-    HourlyPrecipInchIndex = -1
-    if 'HourlyPrecipMMIndex' in WUndergroundMeta:
-        HourlyPrecipMMIndex = WUndergroundMeta.index('HourlyPrecipMM')
-    if 'HourlyPrecipInchIndex' in WUndergroundMeta:
-        HourlyPrecipInchIndex = WUndergroundMeta.index('HourlyPrecipInch')
+        opts = {}
 
     def precipitation(my_timeseries):
-        print('precipitation:: HourlyPrecipMM')
+        print('precipitation:: PrecipitationMM')
         newTimeseries = []
-        prevTime = datetime.strptime(timeseries[0][DateUTCIndex], '%Y-%m-%d %H:%M:%S')
         for t in my_timeseries:
-            currTime = datetime.strptime(t[DateUTCIndex], '%Y-%m-%d %H:%M:%S')
-            gap = currTime - prevTime
-            prec = float(t[HourlyPrecipMMIndex])
-            if HourlyPrecipInchIndex > -1:
-                prec = float(t[HourlyPrecipInchIndex]) * 25.4
-
-            precipitationInGap = float(prec) * gap.seconds / 3600  # If rate per Hour given, calculate for interval
-            # if precipitationInGap > 0 :
-            #     print('\n', float(t[HourlyPrecipMMIndex]), precipitationInGap)
-            newTimeseries.append([t[DateUTCIndex], precipitationInGap])
-            prevTime = currTime
-
+            newTimeseries.append([t['DateUTC'], t['PrecipitationMM']])
         return newTimeseries
 
     def temperature(my_timeseries):
         print('temperature:: TemperatureC')
         newTimeseries = []
         for t in my_timeseries:
-            temp = float(t[TemperatureCIndex])
-            if TemperatureFIndex > -1:
-                temp = (float(t[TemperatureFIndex]) - 32) * 5 / 9
-            newTimeseries.append([t[DateUTCIndex], temp])
+            newTimeseries.append([t['DateUTC'], t['TemperatureC']])
         return newTimeseries
 
     def default(my_timeseries):
@@ -199,8 +171,6 @@ def create_raw_timeseries(adapter, stations, duration, opts):
         'name': 'WUnderground',
     }
 
-    #  'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
-    BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
     for station in stations:
         print('station:', station)
         #  Check whether station exists
@@ -209,9 +179,7 @@ def create_raw_timeseries(adapter, stations, duration, opts):
             logging.warning('Station %s does not exists. Continue with others', station['name'])
             continue
 
-        WUndergroundMeta, *timeseries = get_wu_timeseries(BASE_URL, station['stationId'],
-                                                          end_date_time)  # List Destructuring
-        DateUTCIndex = WUndergroundMeta.index('DateUTC')
+        timeseries = get_timeseries(station, start_date_time, end_date_time)
 
         if len(timeseries) < 1:
             print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
@@ -258,7 +226,7 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                     print('\n')
                     continue
 
-            extractedTimeseries = extract_single_variable_timeseries(timeseries, variables[i], {'WUndergroundMeta': WUndergroundMeta})
+            extractedTimeseries = extract_single_variable_timeseries(timeseries, variables[i])
 
             for l in extractedTimeseries[:3] + extractedTimeseries[-2:]:
                 print(l)

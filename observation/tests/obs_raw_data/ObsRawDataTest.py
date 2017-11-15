@@ -9,7 +9,10 @@ from os.path import join as pjoin
 import unittest2 as unittest
 from curwmysqladapter import MySQLAdapter
 
-from observation.obs_raw_data.ObsRawData import create_raw_timeseries, get_dialog_timeseries, get_wu_timeseries
+from observation.obs_raw_data.ObsRawData import \
+    get_dialog_timeseries, \
+    get_wu_timeseries, \
+    extract_single_variable_timeseries
 
 
 class ObsRawDataTest(unittest.TestCase):
@@ -70,12 +73,40 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_getDialogTimeseries(self):
         self.logger.info('getDialogTimeseries')
-        dialog_timeseries = get_dialog_timeseries(station='3674010756837033')
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
         print(dialog_timeseries)
+        self.assertGreater(len(dialog_timeseries), 0)
 
     def test_getWUndergroundTimeseries(self):
         self.logger.info('getWUndergroundTimeseries')
-        BASE_URL = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
-        date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        wu_timeseries = get_wu_timeseries(base_url=BASE_URL, station='IBATTARA3', date=date_time)
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        wu_timeseries = get_wu_timeseries({'stationId': 'IBATTARA3'}, start_date_time, end_date_time)
         print(wu_timeseries)
+        self.assertGreater(len(wu_timeseries), 0)
+
+    def test_extractSinglePrecipitationDialogTimeseries(self):
+        self.logger.info('test_extractSinglePrecipitationDialogTimeseries')
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
+        print(dialog_timeseries)
+        self.assertGreater(len(dialog_timeseries), 0)
+        extractedTimeseries = extract_single_variable_timeseries(dialog_timeseries, 'Precipitation')
+        print(extractedTimeseries)
+        self.assertTrue(isinstance(extractedTimeseries[0], list))
+        self.assertEqual(len(extractedTimeseries[0]), 2)
+
+    def test_extractSinglePrecipitationWUndergroundTimeseries(self):
+        self.logger.info('test_extractSinglePrecipitationWUndergroundTimeseries')
+        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        wu_timeseries = get_wu_timeseries({'stationId': 'IBATTARA3'}, start_date_time, end_date_time)
+        print(wu_timeseries)
+        self.assertGreater(len(wu_timeseries), 0)
+        extractedTimeseries = extract_single_variable_timeseries(wu_timeseries, 'Precipitation')
+        print(extractedTimeseries)
+        self.assertTrue(isinstance(extractedTimeseries[0], list))
+        self.assertEqual(len(extractedTimeseries[0]), 2)
