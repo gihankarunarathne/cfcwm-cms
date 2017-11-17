@@ -96,12 +96,18 @@ class UtilInterpolationTest(unittest.TestCase):
         timeseries = [
             [datetime.strptime('2017-11-16 13:50:00', '%Y-%m-%d %H:%M:%S'), 4.0],
             [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 5.0],
-            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0]
+            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0],
+            [datetime.strptime('2017-11-16 14:06:00', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-16 14:11:00', '%Y-%m-%d %H:%M:%S'), 7.0],
         ]
         new_timeseries = \
             InterpolationStrategy.get_strategy_for_larger(InterpolationStrategy.Maximum)(timeseries, time_interval)
-        print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 12)
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        print('\n')
+        self.assertEqual(len(new_timeseries), 22)
+        self.assertListEqual(new_timeseries[19], [datetime.strptime('2017-11-16 14:09:00', '%Y-%m-%d %H:%M:%S'), -999])
 
     def test_maximum_smaller(self):
         time_interval = timedelta(seconds=60)
@@ -126,13 +132,20 @@ class UtilInterpolationTest(unittest.TestCase):
         time_interval = timedelta(seconds=60)
         timeseries = [
             [datetime.strptime('2017-11-16 13:50:00', '%Y-%m-%d %H:%M:%S'), 4.0],
-            [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 5.0],
-            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0]
+            [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 6.0],
+            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 7.0],
+            [datetime.strptime('2017-11-16 14:06:00', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-16 14:11:00', '%Y-%m-%d %H:%M:%S'), 7.0],
         ]
         new_timeseries = \
             InterpolationStrategy.get_strategy_for_larger(InterpolationStrategy.Summation)(timeseries, time_interval)
-        print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 12)
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        print('\n')
+        self.assertEqual(len(new_timeseries), 22)
+        self.assertListEqual(new_timeseries[19], [datetime.strptime('2017-11-16 14:09:00', '%Y-%m-%d %H:%M:%S'), -999])
+
 
     def test_summation_smaller(self):
         time_interval = timedelta(seconds=60)
