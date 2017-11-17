@@ -2,6 +2,7 @@ import logging
 import logging.config
 import os
 import json
+from datetime import datetime, timedelta
 from os.path import join as pjoin
 
 import unittest2 as unittest
@@ -9,22 +10,22 @@ from cms_utils.UtilInterpolation import interpolate_timeseries
 from cms_utils.InterpolationStrategy import InterpolationStrategy
 
 
-class InterpolationStrategyTest(unittest.TestCase):
+class UtilInterpolationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root_dir = os.path.dirname(os.path.realpath(__file__))
-        config = json.loads(open(pjoin(cls.root_dir, '../../observation/config/CONFIG.json')).read())
+        # config = json.loads(open(pjoin(cls.root_dir, '../../observation/config/CONFIG.json')).read())
 
         # Initialize Logger
         logging_config = json.loads(open(pjoin(cls.root_dir, '../../observation/config/LOGGING_CONFIG.json')).read())
         logging.config.dictConfig(logging_config)
-        cls.logger = logging.getLogger('InterpolationStrategyTest')
+        cls.logger = logging.getLogger('UtilInterpolationTest')
         cls.logger.addHandler(logging.StreamHandler())
         cls.logger.info('setUpClass')
 
     @classmethod
     def tearDownClass(cls):
-        cls.logger.info('tearDownClass')
+        print('tearDownClass')
 
     def setUp(self):
         self.logger.info('setUp')
@@ -32,23 +33,13 @@ class InterpolationStrategyTest(unittest.TestCase):
     def tearDown(self):
         self.logger.info('tearDown')
 
-    @staticmethod
-    def test_usingAverageStrategyForLargeGaps():
-        timeseries = [['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:58', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0]]
-        interpolate_timeseries(InterpolationStrategy.Average, timeseries)
-
-    @staticmethod
-    def test_usingMaximumStrategy():
-        timeseries = [['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:58', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0]]
-        interpolate_timeseries(InterpolationStrategy.Maximum, timeseries)
-
-    @staticmethod
-    def test_usingSummationStrategy():
-        timeseries = [['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:58', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0],
-                      ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0], ['2017-11-16 13:36:59', 1.0]]
-        interpolate_timeseries(InterpolationStrategy.Summation, timeseries)
+    def test_average_larger(self):
+        time_interval = timedelta(seconds=60)
+        timeseries = [
+            [datetime.strptime('2017-11-16 13:50:00', '%Y-%m-%d %H:%M:%S'), 4.0],
+            [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 5.0],
+            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0]
+        ]
+        new_timeseries = \
+            InterpolationStrategy.get_strategy_for_larger(InterpolationStrategy.Average)(timeseries, time_interval)
+        self.assertEqual(len(new_timeseries), 11)

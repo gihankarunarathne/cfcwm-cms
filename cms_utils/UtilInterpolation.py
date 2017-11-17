@@ -15,9 +15,9 @@ def interpolate_timeseries(strategy, timeseries, time_interval_sec=0, time_inter
 
     if isinstance(strategy, InterpolationStrategy):
         prev_step = timeseries[0]
-        prev_time = datetime.strptime(prev_step[0], '%Y-%m-%d %H:%M:%S')
+        prev_time = prev_step[0]
         for step in timeseries[1:]:
-            curr_time = datetime.strptime(step[0], '%Y-%m-%d %H:%M:%S')
+            curr_time = step[0]
             is_time_step = is_time_step_larger(prev_time, curr_time, time_interval)
             if is_time_step == 1:
                 strategy.get_strategy_for_smaller(strategy)()
