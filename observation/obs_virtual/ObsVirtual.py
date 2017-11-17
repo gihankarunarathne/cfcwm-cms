@@ -63,9 +63,10 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 continue
 
             # Check whether station reside within the basin
-            if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
-                logging.warning('Station %s does not contains inside KUB. Continue with others', station['name'])
-                continue
+            # NOTE: No need to check weather inside the basin
+            # if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
+            #     logging.warning('Station %s does not contains inside KUB. Continue with others', station['name'])
+            #     continue
 
             meta['station'] = station['name']
             if 'run_name' in station:
@@ -112,6 +113,9 @@ def create_kub_timeseries(adapter, stations, duration, opts):
         if len(points) < 1:
             logging.warning("No station data found for given period of time. Abort...")
             continue
+        else:
+            logging.info('Available stations %s', points)
+            print('Available stations:', points)
         # -- Create thiessen polygon
         out = tempfile.mkdtemp(prefix='voronoi_')
         result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
@@ -216,9 +220,10 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 continue
 
             # Check whether station reside within the basin
-            if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
-                logging.warning('Station %s does not contains inside KLB. Continue with others', station['name'])
-                continue
+            # NOTE: No need to check weather inside the basin
+            # if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
+            #     logging.warning('Station %s does not contains inside KLB. Continue with others', station['name'])
+            #     continue
 
             meta['station'] = station['name']
             if 'run_name' in station:
@@ -265,6 +270,9 @@ def create_klb_timeseries(adapter, stations, duration, opts):
         if len(points) < 1:
             logging.warning("No station data found for given period of time. Abort...")
             continue
+        else:
+            logging.info('Available stations %s', points)
+            print('Available stations:', points)
         # -- Create thiessen polygon
         logging.debug("Create thiessen polygon using points: %s", points)
         out = tempfile.mkdtemp(prefix='voronoi_')
