@@ -135,12 +135,59 @@ class InterpolationStrategy(Enum):
 
     """ Summation """
     @staticmethod
-    def summation_larger():
-        print('1')
+    def summation_larger(timeseries, time_interval):
+        print('summation_larger')
+        if len(timeseries) > 1:
+            start_time = timeseries[0][0]
+            end_time = timeseries[-1][0]
+
+            curr_index = 0
+            curr_value = timeseries[curr_index][1]
+            prev_time = timeseries[curr_index][0]
+            next_time = timeseries[curr_index + 1][0]
+            new_timeseries = []
+            while start_time <= end_time:
+                if start_time < next_time:
+                    factor = (next_time - prev_time) / time_interval
+                    new_timeseries.append([start_time, curr_value / factor])
+                else:
+                    curr_index += 1
+                    if curr_index + 1 < len(timeseries):
+                        prev_time = timeseries[curr_index][0]
+                        next_time = timeseries[curr_index + 1][0]
+                    curr_value = timeseries[curr_index][1]
+                    factor = (next_time - prev_time) / time_interval
+                    new_timeseries.append([start_time, curr_value / factor])
+                # Increment tick
+                start_time += time_interval
+            return new_timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     @staticmethod
-    def summation_smaller():
-        print('11')
+    def summation_smaller(timeseries, time_interval):
+        print('summation_smaller')
+        if len(timeseries) > 1:
+            curr_tick = timeseries[0][0]
+            curr_value = timeseries[0][1]
+            total = curr_value
+            count = 1
+            new_timeseries = []
+            for index, step in enumerate(timeseries[1:]):
+                if step[0] < curr_tick:
+                    total += step[1]
+                    count += 1
+                    if index == len(timeseries) - 2:
+                        new_timeseries.append([curr_tick, total])
+                else:
+                    new_timeseries.append([curr_tick, total])
+                    total = step[1]
+                    count = 1
+                    curr_tick += time_interval
+
+            return new_timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     @staticmethod
     def default():
