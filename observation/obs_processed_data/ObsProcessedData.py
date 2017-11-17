@@ -3,7 +3,19 @@ import logging
 
 from curwmysqladapter import Data
 from cms_utils.UtilValidation import validate_timeseries
+from cms_utils.UtilInterpolation import interpolate_timeseries
+from cms_utils.InterpolationStrategy import InterpolationStrategy
 # from ..config import Constants as con
+
+
+def get_interpolated_timeseries(timeseries, variable):
+    if variable == 'Precipitation':
+        return interpolate_timeseries(InterpolationStrategy.Summation, timeseries)
+    elif variable == 'Temperature':
+        return interpolate_timeseries(InterpolationStrategy.Average, timeseries)
+    else:
+        logging.error('Unable to handle variable type: %s', variable)
+        return []
 
 
 def create_processed_timeseries(adapter, stations, duration, opts):
@@ -57,7 +69,8 @@ def create_processed_timeseries(adapter, stations, duration, opts):
                 'max_value': max_values[i],
                 'min_value': min_values[i],
             }
-            validatedTimeseries = validate_timeseries(rawTimeseries, validationObj)
+            validated_timeseries = validate_timeseries(rawTimeseries, validationObj)
+            filled_timeseries = get_interpolated_timeseries(validated_timeseries, variables[i])
 
             # Check whether processed timeseries exists
             new_opts = {
@@ -66,13 +79,14 @@ def create_processed_timeseries(adapter, stations, duration, opts):
                 'mode': Data.processed_data,
             }
             existingTimeseries = adapter.retrieve_timeseries(meta, new_opts)
+            print(existingTimeseries)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
                 print('\n')
                 continue
 
-            for l in validatedTimeseries[:3] + validatedTimeseries[-2:]:
+            for l in filled_timeseries[:3] + filled_timeseries[-2:]:
                 print(l)
 
             rowCount = \
-                adapter.insert_timeseries(eventId, validatedTimeseries, upsert=force_insert, mode=Data.processed_data)
+                adapter.insert_timeseries(eventId, filled_timeseries, upsert=force_insert, mode=Data.processed_data)
             print('%s rows inserted.\n' % rowCount)

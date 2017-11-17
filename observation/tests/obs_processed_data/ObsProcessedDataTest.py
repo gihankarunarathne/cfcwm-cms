@@ -66,6 +66,6 @@ class ObsProcessedDataTest(unittest.TestCase):
         start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
         end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
-        opts = dict(forceInsert=False)
+        opts = dict(force_insert=True)
 
         create_processed_timeseries(self.adapter, stations, duration, opts)
