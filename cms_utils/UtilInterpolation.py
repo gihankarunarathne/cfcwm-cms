@@ -3,13 +3,15 @@ import logging
 from .InterpolationStrategy import InterpolationStrategy
 from .CMSError import InvalidTimeseriesCMSError, InvalidInterpolateStrategyCMSError
 
+maximum_time_step = timedelta(hours=1)  # Possible maximum time step is 1 hour
+
 
 def interpolate_timeseries(strategy, timeseries, time_interval_sec=0, time_interval_min=0):
     if len(timeseries) < 2:
         logging.error('Timeseries should have at least two points to proceed')
         raise InvalidTimeseriesCMSError('Timeseries should have at least two points to proceed')
 
-    time_interval = timedelta(seconds=60) # Default time interval is 60 seconds
+    time_interval = timedelta(seconds=60)  # Default time interval is 60 seconds
     if time_interval_sec != 0 and time_interval_min != 0:
         time_interval = timedelta(minutes=time_interval_min, seconds=time_interval_sec)
 
@@ -55,3 +57,17 @@ def is_time_step_larger(time1, time2, time_interval=timedelta(seconds=60)):
         return 0
     else:
         return -1
+
+
+def get_minimum_time_step(timeseries):
+    minimum = maximum_time_step
+    prev_time = timeseries[0][0]
+    for time, value in timeseries[1:]:
+        diff = time - prev_time
+        if timedelta() < diff < minimum:
+            minimum = diff
+
+    if minimum < maximum_time_step:
+        return minimum
+    else:
+        return None
