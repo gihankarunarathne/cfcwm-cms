@@ -125,11 +125,12 @@ class InterpolationStrategy(Enum):
         print('maximum_smaller')
         if len(timeseries) > 1:
             curr_tick = timeseries[0][0]
+            next_tick = curr_tick + time_interval
             curr_value = timeseries[0][1]
             maximum = curr_value
             new_timeseries = []
             for index, step in enumerate(timeseries[1:]):
-                if step[0] < curr_tick:
+                if step[0] < next_tick:
                     maximum = max(maximum, step[1])
                     if index == len(timeseries) - 2:
                         new_timeseries.append([curr_tick, maximum])
@@ -137,6 +138,7 @@ class InterpolationStrategy(Enum):
                     new_timeseries.append([curr_tick, maximum])
                     maximum = step[1]
                     curr_tick += time_interval
+                    next_tick += time_interval
 
             return new_timeseries
         else:
