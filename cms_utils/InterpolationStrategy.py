@@ -1,5 +1,6 @@
-from enum import Enum
 import math
+from enum import Enum
+
 from .CMSError import InvalidTimeseriesCMSError
 
 
@@ -33,6 +34,7 @@ class InterpolationStrategy(Enum):
         return _name_to_strategy_smaller.get(name, InterpolationStrategy.default)
 
     """ Average """
+
     @staticmethod
     def average_larger(timeseries, time_interval):
         print('average_larger')
@@ -42,14 +44,14 @@ class InterpolationStrategy(Enum):
 
             curr_index = 0
             curr_value = timeseries[curr_index][1]
-            next_time = timeseries[curr_index+1][0]
+            next_time = timeseries[curr_index + 1][0]
             new_timeseries = []
             while start_time <= end_time:
                 if start_time < next_time:
                     new_timeseries.append([start_time, curr_value])
                 else:
                     curr_index += 1
-                    if curr_index+1 < len(timeseries):
+                    if curr_index + 1 < len(timeseries):
                         next_time = timeseries[curr_index + 1][0]
                     curr_value = timeseries[curr_index][1]
                     new_timeseries.append([start_time, curr_value])
@@ -75,7 +77,7 @@ class InterpolationStrategy(Enum):
                     if index == len(timeseries) - 2:
                         new_timeseries.append([curr_tick, total / count])
                 else:
-                    new_timeseries.append([curr_tick, total/count])
+                    new_timeseries.append([curr_tick, total / count])
                     total = step[1]
                     count = 1
                     curr_tick += time_interval
@@ -85,6 +87,7 @@ class InterpolationStrategy(Enum):
             raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     """ Maximum """
+
     @staticmethod
     def maximum_larger(timeseries, time_interval):
         print('maximum_larger')
@@ -134,6 +137,7 @@ class InterpolationStrategy(Enum):
             raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     """ Summation """
+
     @staticmethod
     def summation_larger(timeseries, time_interval):
         print('summation_larger')
@@ -192,3 +196,44 @@ class InterpolationStrategy(Enum):
     @staticmethod
     def default():
         print('0')
+
+    @staticmethod
+    def get_strategy_for_fill_missing(name):
+        _name_to_strategy_fill = {
+            InterpolationStrategy.Average: InterpolationStrategy.same_fill,
+            InterpolationStrategy.Maximum: InterpolationStrategy.same_fill,
+            InterpolationStrategy.Summation: InterpolationStrategy.spread_fill
+        }
+        return _name_to_strategy_fill.get(name, InterpolationStrategy.default_fill)
+
+    @staticmethod
+    def same_fill(step1, step2, time_step):
+        start_time, start_value = step1
+        end_time, end_value = step2
+        diff = end_time - start_time
+        occurrence = int(math.ceil(diff / time_step))
+        new_step = diff / occurrence
+        new_timeseries = []
+        for i in range(0, occurrence):
+            new_timeseries.append(step1)
+            start_time += new_step
+        new_timeseries.append(step2)
+        return new_timeseries
+
+    @staticmethod
+    def spread_fill(step1, step2, time_step):
+        start_time, start_value = step1
+        end_time, end_value = step2
+        diff = end_time - start_time
+        occurrence = int(math.ceil(diff / time_step))
+        new_step = diff / occurrence
+        new_timeseries = []
+        for i in range(0, occurrence):
+            new_timeseries.append([start_time, start_value / occurrence])
+            start_time += new_step
+        new_timeseries.append(step2)
+        return new_timeseries
+
+    @staticmethod
+    def default_fill(step1, step2):
+        return [step1, step2]
