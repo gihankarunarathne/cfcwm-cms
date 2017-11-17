@@ -6,7 +6,9 @@ from os.path import join as pjoin
 from datetime import datetime, timedelta
 
 import unittest2 as unittest
-from cms_utils.UtilInterpolation import interpolate_timeseries, get_minimum_time_step
+from cms_utils.UtilInterpolation import interpolate_timeseries, \
+    get_minimum_time_step, \
+    fill_timeseries_missing_with_values
 from cms_utils.InterpolationStrategy import InterpolationStrategy
 from cms_utils.UtilTimeseries import convert_timeseries_to_datetime
 
@@ -54,6 +56,19 @@ class UtilInterpolationTest(unittest.TestCase):
                       ['2017-11-16 13:50:00', 4.0], ['2017-11-16 13:55:00', 5.0], ['2017-11-16 14:00:00', 6.0],
                       ['2017-11-16 14:06:00', 7.0], ['2017-11-16 14:11:00', 8.0], ['2017-11-16 14:16:00', 9.0]]
         interpolate_timeseries(InterpolationStrategy.Summation, timeseries)
+
+    def test_fill_timeseries_missing_with_values(self):
+        timeseries = [['2017-11-16 00:00:00', 1.0], ['2017-11-16 00:10:00', 2.0], ['2017-11-16 00:15:00', 3.0],
+                      ['2017-11-16 00:20:00', 4.0], ['2017-11-16 00:35:00', 5.0], ['2017-11-16 01:00:00', 6.0],
+                      ['2017-11-16 01:06:00', 7.0], ['2017-11-16 01:11:00', 8.0], ['2017-11-16 01:16:00', 9.0]]
+        new_timeseries = \
+            fill_timeseries_missing_with_values(InterpolationStrategy.Average,
+                                                convert_timeseries_to_datetime(timeseries), timedelta(minutes=5), 3)
+        print(new_timeseries)
+        self.assertEqual(len(new_timeseries), 16)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-16 00:05:00', '%Y-%m-%d %H:%M:%S'), 1.0])
+        self.assertListEqual(new_timeseries[5], [datetime.strptime('2017-11-16 00:25:00', '%Y-%m-%d %H:%M:%S'), 4.0])
+        self.assertListEqual(new_timeseries[9], [datetime.strptime('2017-11-16 00:45:00', '%Y-%m-%d %H:%M:%S'), -999])
 
     def test_getMinimumTimeStep(self):
         timeseries1 = [['2017-11-16 13:35:00', 1.0], ['2017-11-16 13:40:00', 2.0], ['2017-11-16 13:45:00', 3.0],
