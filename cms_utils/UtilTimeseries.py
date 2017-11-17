@@ -1,4 +1,7 @@
-import sys, traceback, csv, json, datetime, getopt, os, copy, requests, argparse, re
+import csv
+import datetime
+import os
+import re
 
 
 def get_timeseries(location, opts):
@@ -91,3 +94,11 @@ def extract_single_variable_timeseries(timeseries, variable, opts=None):
     }
     return variableDict.get(variable, default)(timeseries)
     # --END extract_single_variable_timeseries --
+
+
+def convert_timeseries_to_datetime(timeseries, str_format='%Y-%m-%d %H:%M:%S'):
+    new_timeseries = []
+    for time, *values in timeseries:
+        values.insert(0, datetime.datetime.strptime(time, str_format))
+        new_timeseries.append(values)
+    return new_timeseries
