@@ -66,14 +66,19 @@ class InterpolationStrategy(Enum):
         print('average_smaller')
         if len(timeseries) > 1:
             curr_tick = timeseries[0][0]
+            next_tick = curr_tick + time_interval
             curr_value = timeseries[0][1]
             total = curr_value
             count = 1
             new_timeseries = []
             for index, step in enumerate(timeseries[1:]):
-                if step[0] < curr_tick:
-                    total += step[1]
-                    count += 1
+                if step[0] < next_tick:
+                    if step[1] > -1:
+                        if total > -1:
+                            total += step[1]
+                            count += 1
+                        else:
+                            total = step[1]
                     if index == len(timeseries) - 2:
                         new_timeseries.append([curr_tick, total / count])
                 else:
@@ -81,6 +86,7 @@ class InterpolationStrategy(Enum):
                     total = step[1]
                     count = 1
                     curr_tick += time_interval
+                    next_tick += time_interval
 
             return new_timeseries
         else:
@@ -219,7 +225,7 @@ class InterpolationStrategy(Enum):
                 start_value = missing_value
             new_timeseries.append([start_time, start_value])
             start_time += new_step
-        # new_timeseries.append(step2)
+
         return new_timeseries
 
     @staticmethod
@@ -236,7 +242,7 @@ class InterpolationStrategy(Enum):
                 value = missing_value
             new_timeseries.append([start_time, value])
             start_time += new_step
-        # new_timeseries.append(step2)
+
         return new_timeseries
 
     @staticmethod

@@ -37,11 +37,16 @@ class UtilInterpolationTest(unittest.TestCase):
         timeseries = [
             [datetime.strptime('2017-11-16 13:50:00', '%Y-%m-%d %H:%M:%S'), 4.0],
             [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 5.0],
-            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0]
+            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0],
+            [datetime.strptime('2017-11-16 14:06:00', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-16 14:11:00', '%Y-%m-%d %H:%M:%S'), 7.0],
         ]
         new_timeseries = \
             InterpolationStrategy.get_strategy_for_larger(InterpolationStrategy.Average)(timeseries, time_interval)
-        self.assertEqual(len(new_timeseries), 11)
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 22)
+        self.assertListEqual(new_timeseries[19], [datetime.strptime('2017-11-16 14:09:00', '%Y-%m-%d %H:%M:%S'), -999])
 
     def test_average_smaller(self):
         time_interval = timedelta(seconds=60)
@@ -58,17 +63,33 @@ class UtilInterpolationTest(unittest.TestCase):
             [datetime.strptime('2017-11-15 08:22:21', '%Y-%m-%d %H:%M:%S'), 8.0],
             [datetime.strptime('2017-11-15 08:22:37', '%Y-%m-%d %H:%M:%S'), 9.0],
             [datetime.strptime('2017-11-15 08:22:53', '%Y-%m-%d %H:%M:%S'), 10.0],
-            # No cases like below
-            # [datetime.strptime('2017-11-16 12:46:03', '%Y-%m-%d %H:%M:%S'), 1.0],
-            # [datetime.strptime('2017-11-16 12:46:19', '%Y-%m-%d %H:%M:%S'), 1.0],
-            # [datetime.strptime('2017-11-16 12:46:35', '%Y-%m-%d %H:%M:%S'), 1.0],
-            # [datetime.strptime('2017-11-16 12:46:51', '%Y-%m-%d %H:%M:%S'), 1.0],
-            # [datetime.strptime('2017-11-16 12:47:07', '%Y-%m-%d %H:%M:%S'), 1.0]
         ]
         new_timeseries = \
             InterpolationStrategy.get_strategy_for_smaller(InterpolationStrategy.Average)(timeseries, time_interval)
-        print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 4)
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        print('\n')
+        self.assertEqual(len(new_timeseries), 3)
+
+        timeseries2 = [
+            [datetime.strptime('2017-11-15 00:00:00', '%Y-%m-%d %H:%M:%S'), 1.0],
+            [datetime.strptime('2017-11-15 00:00:16', '%Y-%m-%d %H:%M:%S'), 2.0],
+            [datetime.strptime('2017-11-15 00:00:32', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-15 00:00:48', '%Y-%m-%d %H:%M:%S'), 4.0],
+            [datetime.strptime('2017-11-15 00:01:04', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-15 00:01:20', '%Y-%m-%d %H:%M:%S'), 6.0],
+            [datetime.strptime('2017-11-15 00:01:36', '%Y-%m-%d %H:%M:%S'), -999],
+            [datetime.strptime('2017-11-15 00:01:52', '%Y-%m-%d %H:%M:%S'), 7.0],
+            [datetime.strptime('2017-11-15 00:02:08', '%Y-%m-%d %H:%M:%S'), 8.0],
+            [datetime.strptime('2017-11-15 00:02:24', '%Y-%m-%d %H:%M:%S'), 9.0],
+        ]
+        new_timeseries = \
+            InterpolationStrategy.get_strategy_for_smaller(InterpolationStrategy.Average)(timeseries2, time_interval)
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 3)
 
     def test_maximum_larger(self):
         time_interval = timedelta(seconds=60)
