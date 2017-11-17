@@ -5,6 +5,9 @@ from .CMSError import InvalidTimeseriesCMSError
 class InterpolationStrategy(Enum):
     """
     InterpolationStrategy
+
+    NOTE: Assume that there isn't any gaps in the timeseries.
+    Gaps need to be fulfill before going to feed into the functions.
     """
     Average = 'Average'
     Maximum = 'Maximum'
@@ -12,21 +15,21 @@ class InterpolationStrategy(Enum):
 
     @staticmethod
     def get_strategy_for_larger(name):
-        _nameToStrategy = {
+        _name_to_strategy_larger = {
             InterpolationStrategy.Average: InterpolationStrategy.average_larger,
             InterpolationStrategy.Maximum: InterpolationStrategy.maximum_larger,
             InterpolationStrategy.Summation: InterpolationStrategy.summation_larger
         }
-        return _nameToStrategy.get(name, InterpolationStrategy.default)
+        return _name_to_strategy_larger.get(name, InterpolationStrategy.default)
 
     @staticmethod
     def get_strategy_for_smaller(name):
-        _nameToStrategy = {
+        _name_to_strategy_smaller = {
             InterpolationStrategy.Average: InterpolationStrategy.average_smaller,
             InterpolationStrategy.Maximum: InterpolationStrategy.maximum_smaller,
             InterpolationStrategy.Summation: InterpolationStrategy.summation_smaller
         }
-        return _nameToStrategy.get(name, InterpolationStrategy.default)
+        return _name_to_strategy_smaller.get(name, InterpolationStrategy.default)
 
     """ Average """
     @staticmethod
@@ -56,8 +59,27 @@ class InterpolationStrategy(Enum):
             raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     @staticmethod
-    def average_smaller():
-        print('15')
+    def average_smaller(timeseries, time_interval):
+        print('average_smaller')
+        if len(timeseries) > 1:
+            curr_tick = timeseries[0][0]
+            curr_value = timeseries[0][1]
+            total = curr_value
+            count = 1
+            new_timeseries = []
+            for step in timeseries[1:]:
+                if step[0] < curr_tick:
+                    total += step[1]
+                    count += 1
+                else:
+                    new_timeseries.append([curr_tick, total/count])
+                    total = step[1]
+                    count = 1
+                    curr_tick += time_interval
+
+            return new_timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     """ Maximum """
     @staticmethod
