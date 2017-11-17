@@ -9,7 +9,7 @@ setup(
     author='Gihan Karunarathne',
     author_email='gihan.09@cse.mrt.ac.lk',
     description='CMS Server Utilities',
-    requires=['shapely', 'joblib', 'netCDF4', 'matplotlib', 'imageio', 'scipy', 'geopandas'],
+    requires=['shapely', 'joblib', 'netCDF4', 'matplotlib', 'imageio', 'scipy', 'geopandas', 'requests'],
     test_suite='nose.collector',
     tests_require=[
         'nose',

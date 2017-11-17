@@ -57,23 +57,37 @@ def get_timeseries_from_file(location, opts):
 
         formattedTimeseries.append([dtUTC.strftime(COMMON_DATE_FORMAT), value])
     return formattedTimeseries
+    # --END get_timeseries_from_file --
 
 
-def extract_single_timeseries(timeseries, variable, opts=None):
+def extract_single_variable_timeseries(timeseries, variable, opts=None):
     """
-    Extract Single Timeseries from Multiple values against single timeseries as below,
-    ['Timestamp', 'Precipitation', 'Temperature']
+    Then Lines follows the data. This function will extract the given variable timeseries
     """
     if opts is None:
-        opts = {'values': []}
-    ValuesMeta = opts.get('values', ['Timestamp', 'Precipitation', 'Temperature'])
+        opts = {}
 
-    DateUTCIndex = ValuesMeta.index('Timestamp')
-    variableIndex = ValuesMeta.index(variable)
+    def precipitation(my_timeseries):
+        print('precipitation:: PrecipitationMM')
+        newTimeseries = []
+        for t in my_timeseries:
+            newTimeseries.append([t['DateUTC'], t['PrecipitationMM']])
+        return newTimeseries
 
-    newTimeseries = []
-    for t in timeseries:
-        newTimeseries.append([t[DateUTCIndex], t[variableIndex]])
+    def temperature(my_timeseries):
+        print('temperature:: TemperatureC')
+        newTimeseries = []
+        for t in my_timeseries:
+            newTimeseries.append([t['DateUTC'], t['TemperatureC']])
+        return newTimeseries
 
-    return newTimeseries
-    # --END extractSingleTimeseries --
+    def default(my_timeseries):
+        print('default', my_timeseries)
+        return []
+
+    variableDict = {
+        'Precipitation': precipitation,
+        'Temperature': temperature,
+    }
+    return variableDict.get(variable, default)(timeseries)
+    # --END extract_single_variable_timeseries --

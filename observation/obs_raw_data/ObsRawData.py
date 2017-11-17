@@ -5,8 +5,10 @@ import os
 import logging
 from datetime import datetime
 from curwmysqladapter import Station
+from cms_utils import UtilTimeseries
 
 # from ..config import Constants as con
+
 
 def get_weather_station_data_format():
     script_path = os.path.dirname(os.path.realpath(__file__))
@@ -100,6 +102,7 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
         if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
     for line in data:
+        print(line)
         # Mapping Response to common format
         new_item = copy.deepcopy(common_format)
         # -- DateUTC
@@ -126,39 +129,6 @@ def get_timeseries(station, start_date, end_date):
     else:
         logging.warning("Unknown host to retrieve the data %s", station['run_name'])
         return []
-
-
-def extract_single_variable_timeseries(timeseries, variable, opts=None):
-    """
-    Then Lines follows the data. This function will extract the given variable timeseries
-    """
-    if opts is None:
-        opts = {}
-
-    def precipitation(my_timeseries):
-        print('precipitation:: PrecipitationMM')
-        newTimeseries = []
-        for t in my_timeseries:
-            newTimeseries.append([t['DateUTC'], t['PrecipitationMM']])
-        return newTimeseries
-
-    def temperature(my_timeseries):
-        print('temperature:: TemperatureC')
-        newTimeseries = []
-        for t in my_timeseries:
-            newTimeseries.append([t['DateUTC'], t['TemperatureC']])
-        return newTimeseries
-
-    def default(my_timeseries):
-        print('default', my_timeseries)
-        return []
-
-    variableDict = {
-        'Precipitation': precipitation,
-        'Temperature': temperature,
-    }
-    return variableDict.get(variable, default)(timeseries)
-    # --END extractSingleTimeseries --
 
 
 def create_raw_timeseries(adapter, stations, duration, opts):
@@ -240,7 +210,7 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                     print('\n')
                     continue
 
-            extractedTimeseries = extract_single_variable_timeseries(timeseries, variables[i])
+            extractedTimeseries = UtilTimeseries.extract_single_variable_timeseries(timeseries, variables[i])
 
             for l in extractedTimeseries[:3] + extractedTimeseries[-2:]:
                 print(l)
