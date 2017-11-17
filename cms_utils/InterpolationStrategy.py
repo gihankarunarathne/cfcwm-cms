@@ -181,21 +181,20 @@ class InterpolationStrategy(Enum):
         print('summation_smaller')
         if len(timeseries) > 1:
             curr_tick = timeseries[0][0]
+            next_tick = curr_tick + time_interval
             curr_value = timeseries[0][1]
-            total = curr_value
-            count = 1
+            total = curr_value if curr_value > -1 else 0
             new_timeseries = []
             for index, step in enumerate(timeseries[1:]):
-                if step[0] < curr_tick:
-                    total += step[1]
-                    count += 1
+                if step[0] < next_tick:
+                    total += step[1] if step[1] > -1 else 0
                     if index == len(timeseries) - 2:
                         new_timeseries.append([curr_tick, total])
                 else:
                     new_timeseries.append([curr_tick, total])
-                    total = step[1]
-                    count = 1
+                    total = step[1] if step[1] > -1 else 0
                     curr_tick += time_interval
+                    next_tick += time_interval
 
             return new_timeseries
         else:
