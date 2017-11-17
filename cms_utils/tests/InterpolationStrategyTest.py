@@ -68,4 +68,34 @@ class UtilInterpolationTest(unittest.TestCase):
         new_timeseries = \
             InterpolationStrategy.get_strategy_for_smaller(InterpolationStrategy.Average)(timeseries, time_interval)
         print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 3)
+        self.assertEqual(len(new_timeseries), 4)
+
+    def test_maximum_larger(self):
+        time_interval = timedelta(seconds=60)
+        timeseries = [
+            [datetime.strptime('2017-11-16 13:50:00', '%Y-%m-%d %H:%M:%S'), 4.0],
+            [datetime.strptime('2017-11-16 13:55:00', '%Y-%m-%d %H:%M:%S'), 5.0],
+            [datetime.strptime('2017-11-16 14:01:00', '%Y-%m-%d %H:%M:%S'), 6.0]
+        ]
+        new_timeseries = \
+            InterpolationStrategy.get_strategy_for_larger(InterpolationStrategy.Maximum)(timeseries, time_interval)
+        self.assertEqual(len(new_timeseries), 11)
+
+    def test_maximum_smaller(self):
+        time_interval = timedelta(seconds=60)
+        timeseries = [
+            [datetime.strptime('2017-11-15 08:20:29', '%Y-%m-%d %H:%M:%S'), 1.0],
+            [datetime.strptime('2017-11-15 08:20:45', '%Y-%m-%d %H:%M:%S'), 2.0],
+            [datetime.strptime('2017-11-15 08:21:01', '%Y-%m-%d %H:%M:%S'), 3.0],
+            [datetime.strptime('2017-11-15 08:21:17', '%Y-%m-%d %H:%M:%S'), 4.0],
+            [datetime.strptime('2017-11-15 08:21:33', '%Y-%m-%d %H:%M:%S'), 5.0],
+            [datetime.strptime('2017-11-15 08:21:49', '%Y-%m-%d %H:%M:%S'), 6.0],
+            [datetime.strptime('2017-11-15 08:22:05', '%Y-%m-%d %H:%M:%S'), 7.0],
+            [datetime.strptime('2017-11-15 08:22:21', '%Y-%m-%d %H:%M:%S'), 8.0],
+            [datetime.strptime('2017-11-15 08:22:37', '%Y-%m-%d %H:%M:%S'), 9.0],
+            [datetime.strptime('2017-11-15 08:22:53', '%Y-%m-%d %H:%M:%S'), 10.0],
+        ]
+        new_timeseries = \
+            InterpolationStrategy.get_strategy_for_smaller(InterpolationStrategy.Maximum)(timeseries, time_interval)
+        print(new_timeseries)
+        self.assertEqual(len(new_timeseries), 4)

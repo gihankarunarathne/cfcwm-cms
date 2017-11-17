@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 from .CMSError import InvalidTimeseriesCMSError
 
 
@@ -67,10 +68,12 @@ class InterpolationStrategy(Enum):
             total = curr_value
             count = 1
             new_timeseries = []
-            for step in timeseries[1:]:
+            for index, step in enumerate(timeseries[1:]):
                 if step[0] < curr_tick:
                     total += step[1]
                     count += 1
+                    if index == len(timeseries) - 2:
+                        new_timeseries.append([curr_tick, total / count])
                 else:
                     new_timeseries.append([curr_tick, total/count])
                     total = step[1]
@@ -83,12 +86,52 @@ class InterpolationStrategy(Enum):
 
     """ Maximum """
     @staticmethod
-    def maximum_larger():
-        print('3')
+    def maximum_larger(timeseries, time_interval):
+        print('maximum_larger')
+        if len(timeseries) > 1:
+            start_time = timeseries[0][0]
+            end_time = timeseries[-1][0]
+
+            curr_index = 0
+            curr_value = timeseries[curr_index][1]
+            next_time = timeseries[curr_index + 1][0]
+            new_timeseries = []
+            while start_time <= end_time:
+                if start_time < next_time:
+                    new_timeseries.append([start_time, curr_value])
+                else:
+                    curr_index += 1
+                    if curr_index + 1 < len(timeseries):
+                        next_time = timeseries[curr_index + 1][0]
+                    curr_value = timeseries[curr_index][1]
+                    new_timeseries.append([start_time, curr_value])
+                # Increment tick
+                start_time += time_interval
+            return new_timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     @staticmethod
-    def maximum_smaller():
-        print('13')
+    def maximum_smaller(timeseries, time_interval):
+        print('maximum_smaller')
+        if len(timeseries) > 1:
+            curr_tick = timeseries[0][0]
+            curr_value = timeseries[0][1]
+            maximum = curr_value
+            new_timeseries = []
+            for index, step in enumerate(timeseries[1:]):
+                if step[0] < curr_tick:
+                    maximum = max(maximum, step[1])
+                    if index == len(timeseries) - 2:
+                        new_timeseries.append([curr_tick, maximum])
+                else:
+                    new_timeseries.append([curr_tick, maximum])
+                    maximum = step[1]
+                    curr_tick += time_interval
+
+            return new_timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Time series should have at least two steps: %s' % len(timeseries))
 
     """ Summation """
     @staticmethod
