@@ -207,7 +207,7 @@ class InterpolationStrategy(Enum):
         return _name_to_strategy_fill.get(name, InterpolationStrategy.default_fill)
 
     @staticmethod
-    def same_fill(step1, step2, time_step):
+    def same_fill(step1, step2, time_step, missing_value=None):
         start_time, start_value = step1
         end_time, end_value = step2
         diff = end_time - start_time
@@ -215,13 +215,15 @@ class InterpolationStrategy(Enum):
         new_step = diff / occurrence
         new_timeseries = []
         for i in range(0, occurrence):
-            new_timeseries.append(step1)
+            if missing_value is not None and i:
+                start_value = missing_value
+            new_timeseries.append([start_time, start_value])
             start_time += new_step
-        new_timeseries.append(step2)
+        # new_timeseries.append(step2)
         return new_timeseries
 
     @staticmethod
-    def spread_fill(step1, step2, time_step):
+    def spread_fill(step1, step2, time_step, missing_value=None):
         start_time, start_value = step1
         end_time, end_value = step2
         diff = end_time - start_time
@@ -229,9 +231,12 @@ class InterpolationStrategy(Enum):
         new_step = diff / occurrence
         new_timeseries = []
         for i in range(0, occurrence):
-            new_timeseries.append([start_time, start_value / occurrence])
+            value = start_value / occurrence
+            if missing_value is not None and i:
+                value = missing_value
+            new_timeseries.append([start_time, value])
             start_time += new_step
-        new_timeseries.append(step2)
+        # new_timeseries.append(step2)
         return new_timeseries
 
     @staticmethod

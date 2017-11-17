@@ -137,26 +137,41 @@ class UtilInterpolationTest(unittest.TestCase):
         step2 = [datetime.strptime('2017-11-15 08:30:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         new_timeseries = InterpolationStrategy.same_fill(step1, step2, timedelta(minutes=5))
         print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 3)
-        self.assertListEqual(new_timeseries[1], step1)
+        self.assertEqual(len(new_timeseries), 2)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), 1.0])
+
         step1 = [datetime.strptime('2017-11-15 08:20:00', '%Y-%m-%d %H:%M:%S'), 1.0]
         step2 = [datetime.strptime('2017-11-15 08:40:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         new_timeseries = InterpolationStrategy.same_fill(step1, step2, timedelta(minutes=5))
         print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 5)
-        self.assertListEqual(new_timeseries[1], step1)
+        self.assertEqual(len(new_timeseries), 4)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), 1.0])
+
+        step1 = [datetime.strptime('2017-11-15 08:20:00', '%Y-%m-%d %H:%M:%S'), 1.0]
+        step2 = [datetime.strptime('2017-11-15 08:40:00', '%Y-%m-%d %H:%M:%S'), 2.0]
+        new_timeseries = InterpolationStrategy.same_fill(step1, step2, timedelta(minutes=5), -999)
+        print(new_timeseries)
+        self.assertEqual(len(new_timeseries), 4)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), -999])
 
     def test_spread_fill(self):
         step1 = [datetime.strptime('2017-11-15 08:20:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         step2 = [datetime.strptime('2017-11-15 08:30:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         new_timeseries = InterpolationStrategy.spread_fill(step1, step2, timedelta(minutes=5))
         print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 3)
+        self.assertEqual(len(new_timeseries), 2)
         self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), 1.0])
 
         step1 = [datetime.strptime('2017-11-15 08:20:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         step2 = [datetime.strptime('2017-11-15 08:40:00', '%Y-%m-%d %H:%M:%S'), 2.0]
         new_timeseries = InterpolationStrategy.spread_fill(step1, step2, timedelta(minutes=5))
         print(new_timeseries)
-        self.assertEqual(len(new_timeseries), 5)
+        self.assertEqual(len(new_timeseries), 4)
         self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), 0.5])
+
+        step1 = [datetime.strptime('2017-11-15 08:20:00', '%Y-%m-%d %H:%M:%S'), 2.0]
+        step2 = [datetime.strptime('2017-11-15 08:40:00', '%Y-%m-%d %H:%M:%S'), 2.0]
+        new_timeseries = InterpolationStrategy.spread_fill(step1, step2, timedelta(minutes=5), -999)
+        print(new_timeseries)
+        self.assertEqual(len(new_timeseries), 4)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 08:25:00', '%Y-%m-%d %H:%M:%S'), -999])
