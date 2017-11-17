@@ -161,7 +161,7 @@ class InterpolationStrategy(Enum):
             while start_time <= end_time:
                 if start_time < next_time:
                     factor = (next_time - prev_time) / time_interval if curr_value > -1 else 1
-                    new_timeseries.append([start_time, curr_value / factor])
+                    new_timeseries.append([start_time, float(curr_value) / factor])
                 else:
                     curr_index += 1
                     if curr_index + 1 < len(timeseries):
@@ -169,7 +169,7 @@ class InterpolationStrategy(Enum):
                         next_time = timeseries[curr_index + 1][0]
                     curr_value = timeseries[curr_index][1]
                     factor = (next_time - prev_time) / time_interval if curr_value > -1 else 1
-                    new_timeseries.append([start_time, curr_value / factor])
+                    new_timeseries.append([start_time, float(curr_value) / factor])
                 # Increment tick
                 start_time += time_interval
             return new_timeseries
