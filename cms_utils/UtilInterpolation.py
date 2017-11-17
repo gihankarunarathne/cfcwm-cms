@@ -18,19 +18,18 @@ def interpolate_timeseries(strategy, timeseries, time_interval_sec=0, time_inter
         time_interval = timedelta(minutes=time_interval_min, seconds=time_interval_sec)
 
     if isinstance(strategy, InterpolationStrategy):
-        prev_step = timeseries[0]
-        prev_time = prev_step[0]
-        for step in timeseries[1:]:
-            curr_time = step[0]
-            is_time_step = is_time_step_larger(prev_time, curr_time, time_interval)
-            if is_time_step == 1:
-                strategy.get_strategy_for_smaller(strategy)()
-            elif is_time_step == 3:
-                strategy.get_strategy_for_larger(strategy)()
+        time_step = get_minimum_time_step(timeseries)
+        if time_step is not None:
+            filled_timeseries = fill_timeseries_missing_with_values(strategy, timeseries, time_step)
+            if time_step < time_interval:
+                return InterpolationStrategy.get_strategy_for_smaller(strategy)(filled_timeseries, time_interval)
+            elif time_step > time_interval:
+                return InterpolationStrategy.get_strategy_for_larger(strategy)(filled_timeseries, time_interval)
             else:
-                logging.error('Time step difference have an issue: %s', is_time_step)
-            prev_step = step
-            prev_time = curr_time
+                logging.error('Time step difference is equal to time interval')
+                return timeseries
+        else:
+            raise InvalidTimeseriesCMSError('Unable to find time step in timeseries')
     else:
         raise InvalidInterpolateStrategyCMSError('Invalid Interpolate Strategy')
 

@@ -36,26 +36,80 @@ class UtilInterpolationTest(unittest.TestCase):
     def tearDown(self):
         self.logger.info('tearDown')
 
-    @staticmethod
-    def test_usingAverageStrategyForLargeGaps():
+    def test_usingAverageStrategyForLargeGaps(self):
         timeseries = [['2017-11-16 13:35:00', 1.0], ['2017-11-16 13:40:00', 2.0], ['2017-11-16 13:45:00', 3.0],
                       ['2017-11-16 13:50:00', 4.0], ['2017-11-16 13:55:00', 5.0], ['2017-11-16 14:00:00', 6.0],
                       ['2017-11-16 14:06:00', 7.0], ['2017-11-16 14:11:00', 8.0], ['2017-11-16 14:16:00', 9.0]]
-        interpolate_timeseries(InterpolationStrategy.Average, timeseries)
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Average, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 42)
+        self.assertListEqual(new_timeseries[40], [datetime.strptime('2017-11-16 14:15:00', '%Y-%m-%d %H:%M:%S'), 8.0])
 
-    @staticmethod
-    def test_usingMaximumStrategyForLargeGaps():
-        timeseries = [['2017-11-16 13:35:00', 1.0], ['2017-11-16 13:40:00', 2.0], ['2017-11-16 13:45:00', 3.0],
-                      ['2017-11-16 13:50:00', 4.0], ['2017-11-16 13:55:00', 5.0], ['2017-11-16 14:00:00', 6.0],
+    def test_usingMaximumStrategyForLargeGaps(self):
+        timeseries = [['2017-11-16 13:35:00', 1.0], ['2017-11-16 13:40:00', 2.0], ['2017-11-16 13:45:00', -999],
+                      ['2017-11-16 13:50:00', 4.0], ['2017-11-16 13:55:00', 5.0],
                       ['2017-11-16 14:06:00', 7.0], ['2017-11-16 14:11:00', 8.0], ['2017-11-16 14:16:00', 9.0]]
-        interpolate_timeseries(InterpolationStrategy.Maximum, timeseries)
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Maximum, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 42)
+        self.assertListEqual(new_timeseries[40], [datetime.strptime('2017-11-16 14:15:00', '%Y-%m-%d %H:%M:%S'), 8.0])
 
-    @staticmethod
-    def test_usingSummationStrategyForLargeGaps():
+    def test_usingSummationStrategyForLargeGaps(self):
         timeseries = [['2017-11-16 13:35:00', 1.0], ['2017-11-16 13:40:00', 2.0], ['2017-11-16 13:45:00', 3.0],
                       ['2017-11-16 13:50:00', 4.0], ['2017-11-16 13:55:00', 5.0], ['2017-11-16 14:00:00', 6.0],
                       ['2017-11-16 14:06:00', 7.0], ['2017-11-16 14:11:00', 8.0], ['2017-11-16 14:16:00', 9.0]]
-        interpolate_timeseries(InterpolationStrategy.Summation, timeseries)
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Summation, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 42)
+        self.assertListEqual(new_timeseries[40], [datetime.strptime('2017-11-16 14:15:00', '%Y-%m-%d %H:%M:%S'), 1.6])
+
+    def test_usingAverageStrategyForSmallerGaps(self):
+        timeseries = [['2017-11-15 00:00:00', 1.0], ['2017-11-15 00:00:16', 2.0], ['2017-11-15 00:00:32', -999],
+                      ['2017-11-15 00:00:48', 4.0], ['2017-11-15 00:01:04', -999], ['2017-11-15 00:01:20', 6.0],
+                      ['2017-11-15 00:01:36', -999], ['2017-11-15 00:01:52', 7.0], ['2017-11-15 00:02:08', 8.0],
+                      ['2017-11-15 00:02:24', 9.0]]
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Average, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 3)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 0:01:00', '%Y-%m-%d %H:%M:%S'), 6.5])
+
+    def test_usingMaximumStrategyForSmallerGaps(self):
+        timeseries = [['2017-11-15 00:00:00', 1.0], ['2017-11-15 00:00:16', 2.0], ['2017-11-15 00:00:32', -999],
+                      ['2017-11-15 00:00:48', 4.0], ['2017-11-15 00:01:04', -999], ['2017-11-15 00:01:20', 6.0],
+                      ['2017-11-15 00:01:36', -999], ['2017-11-15 00:01:52', 7.0], ['2017-11-15 00:02:08', 8.0],
+                      ['2017-11-15 00:02:24', 9.0]]
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Maximum, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 3)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 0:01:00', '%Y-%m-%d %H:%M:%S'), 7.0])
+
+    def test_usingSummationStrategyForSmallerGaps(self):
+        timeseries = [['2017-11-15 00:00:00', 1.0], ['2017-11-15 00:00:16', 2.0], ['2017-11-15 00:00:32', -999],
+                      ['2017-11-15 00:00:48', 4.0], ['2017-11-15 00:01:04', -999], ['2017-11-15 00:01:20', 6.0],
+                      ['2017-11-15 00:01:36', -999], ['2017-11-15 00:01:52', 7.0], ['2017-11-15 00:02:08', 8.0],
+                      ['2017-11-15 00:02:24', 9.0]]
+        new_timeseries = \
+            interpolate_timeseries(InterpolationStrategy.Summation, convert_timeseries_to_datetime(timeseries))
+        print('Result::')
+        for t in new_timeseries:
+            print(t)
+        self.assertEqual(len(new_timeseries), 3)
+        self.assertListEqual(new_timeseries[1], [datetime.strptime('2017-11-15 0:01:00', '%Y-%m-%d %H:%M:%S'), 13.0])
 
     def test_fill_timeseries_missing_with_values(self):
         timeseries = [['2017-11-16 00:00:00', 1.0], ['2017-11-16 00:10:00', 2.0], ['2017-11-16 00:15:00', 3.0],
