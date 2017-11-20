@@ -158,7 +158,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
         metaKUB['station'] = 'KUB Obs'
         metaKUB['variable'] = variables[i]
         metaKUB['unit'] = units[i]
-        metaKUB['name'] = 'KUB Obs WUnderground'
+        metaKUB['name'] = 'KUB Obs Mean'
         klb_event_id = adapter.get_event_id(metaKUB)
         if klb_event_id is None:
             klb_event_id = adapter.create_event_id(metaKUB)
@@ -318,7 +318,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
         metaKLB['station'] = 'KLB Obs'
         metaKLB['variable'] = variables[i]
         metaKLB['unit'] = units[i]
-        metaKLB['name'] = 'KLB Obs WUnderground'
+        metaKLB['name'] = 'KLB Obs Mean'
         klb_event_id = adapter.get_event_id(metaKLB)
         if klb_event_id is None:
             klb_event_id = adapter.create_event_id(metaKLB)
