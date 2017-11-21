@@ -14,6 +14,7 @@ try:
     parser.add_argument("-i", "--interval", help="Time Interval between two events in hours. Default 24 hours")
     parser.add_argument("-f", "--force", action='store_true', help="Force insert.")
     parser.add_argument("-v", "--version", help="Python version. eg: python3")
+    parser.add_argument("--add-start-date", action='store_true', help="Whether to add start date for params")
     parser.add_argument("--add-end-date", action='store_true', help="Whether to add end date for params")
     parser.add_argument("-m", "--mode", help="One of 'all' | 'raw' | 'processed' | 'virtual'")
     parser.add_argument("--add-mode", action='store_true', help="Whether to add mode for params")
@@ -37,12 +38,18 @@ try:
 
     while startDate <= endDate:
         execList = [pythonV, args.file_path]
-        execList = execList + ['-d', startDate.strftime("%Y-%m-%d")]
+        if args.add_start_date:
+            execList = execList + ['-s', startDate.strftime("%Y-%m-%d")]
+            execList = execList + ['--start-time', startDate.strftime("%H:%M:%S")]
+        else:
+            execList = execList + ['-d', startDate.strftime("%Y-%m-%d")]
+
         if args.force:
             execList = execList + ['-f']
         if args.add_end_date:
-            tmpEndDate = startDate + datetime.timedelta(hours=timeInterval-1)
+            tmpEndDate = startDate + datetime.timedelta(hours=timeInterval)
             execList = execList + ['-e', tmpEndDate.strftime("%Y-%m-%d")]
+            execList = execList + ['--end-time', tmpEndDate.strftime("%H:%M:%S")]
         if args.add_mode:
             execList = execList + ['-m', args.mode]
         print('*********************************************************')
