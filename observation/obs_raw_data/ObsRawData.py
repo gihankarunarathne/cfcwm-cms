@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from curwmysqladapter import Station
 from cms_utils import UtilTimeseries, UtilValidation
 
-from ..config import Constants as Constant
+from observation.config import Constants as Constant
 
 
 def get_weather_station_data_format():
@@ -20,6 +20,7 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
     base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php'
     now = datetime.now()
     rows = int((now - start_date_time) / timedelta(seconds=15))
+    print('Dialog::need to get %s rows' % rows)
     payload = {
         'mac': station['stationId'],
         'rows': rows
@@ -105,20 +106,23 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
         if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
     for line in data:
-        # Mapping Response to common format
-        new_item = copy.deepcopy(common_format)
-        # -- DateUTC
-        new_item['DateUTC'] = line[DateUTCIndex]
-        # -- TemperatureC
-        new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
-            if TemperatureCFactor else float(line[TemperatureCIndex])
-        # -- PrecipitationMM
-        new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
-            if PrecipitationMMFactor else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
-        prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
-            if PrecipitationMMFactor else float(line[PrecipitationMMIndex])
+        line_time = datetime.strptime(line[DateUTCIndex], Constant.DATE_TIME_FORMAT)
+        if start_date_time <= line_time <= end_date_time:
+            # Mapping Response to common format
+            new_item = copy.deepcopy(common_format)
+            # -- DateUTC
+            new_item['DateUTC'] = line[DateUTCIndex]
+            # -- TemperatureC
+            new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
+                if TemperatureCFactor else float(line[TemperatureCIndex])
+            # -- PrecipitationMM
+            new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
+                if PrecipitationMMFactor else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
+            prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
+                if PrecipitationMMFactor else float(line[PrecipitationMMIndex])
 
-        timeseries.append(new_item)
+            timeseries.append(new_item)
+
     return timeseries
     # --END get_timeseries --
 
@@ -212,11 +216,15 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                 }
                 existingTimeseries = adapter.retrieve_timeseries(metaQuery, opts)
                 if len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
-                    print('\n')
+                    print('Timeseries already exists. Use force insert to insert data.\n')
                     continue
 
             extractedTimeseries = UtilTimeseries.extract_single_variable_timeseries(timeseries, variables[i])
-            extractedTimeseries = UtilValidation.handle_duplicate_values(extractedTimeseries)
+            validation_obj = {
+                'max_value': station['max_values'][i],
+                'min_value': station['min_values'][i],
+            }
+            extractedTimeseries = UtilValidation.handle_duplicate_values(extractedTimeseries, validation_obj)
             if station['run_name'] == 'Dialog':
                 print('Dialog::')
                 print(extractedTimeseries)
