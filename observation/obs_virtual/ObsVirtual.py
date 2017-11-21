@@ -125,8 +125,8 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 logging.info('Available stations %s', points)
                 print('Available stations:', points)
             else:
-                logging.warning("Available points should be unique. Abort...")
-                print("Available points should be unique. Abort...")
+                logging.warning("Available points should be unique: %s. Abort...", points)
+                print("Available points should be unique: %s. Abort..." % points)
                 continue
         # -- Create thiessen polygon
         out = tempfile.mkdtemp(prefix='voronoi_')
@@ -293,8 +293,8 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 logging.info('Available stations %s', points)
                 print('Available stations:', points)
             else:
-                logging.warning("Available points should be unique. Abort...")
-                print("Available points should be unique. Abort...")
+                logging.warning("Available points should be unique: %s. Abort...", points)
+                print("Available points should be unique: %s. Abort..." % points)
                 continue
         # -- Create thiessen polygon
         logging.debug("Create thiessen polygon using points: %s", points)
