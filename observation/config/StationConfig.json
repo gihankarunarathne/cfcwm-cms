@@ -99,18 +99,6 @@
             "min_values": ["0", "0"],
             "description": "UDUWAWALA STATION",
             "run_name": "WUnderground"
-        }, {
-            "stationId": "3674010756837033",
-            "name": "Hingurana",
-            "station_meta": ["curw_hingurana", "Hingurana", 6.904552, 80.407895, 0, "Hingurana Station"],
-            "source": "WeatherStation",
-            "type": "Observed",
-            "variables": ["Precipitation", "Temperature"],
-            "units": ["mm", "oC"],
-            "max_values": ["120", "40"],
-            "min_values": ["0", "0"],
-            "description": "HINGURANA STATION",
-            "run_name": "Dialog"
         }
     ]
 }

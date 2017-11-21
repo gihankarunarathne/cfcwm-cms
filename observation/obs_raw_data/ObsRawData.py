@@ -125,7 +125,7 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     PrecipitationMMFactor = False
     PrecipitationMMIndex = WUndergroundMeta.index('dailyrainMM') if 'dailyrainMM' in WUndergroundMeta else None
     if PrecipitationMMIndex is None:
-        PrecipitationMMIndex = WUndergroundMeta.index('dailyrainInch')
+        PrecipitationMMIndex = WUndergroundMeta.index('dailyrainin')
         PrecipitationMMFactor = True
 
     timeseries = []
