@@ -24,6 +24,11 @@ def get_basin_shape(shape_file):
 
 
 def create_kub_timeseries(adapter, stations, duration, opts):
+    print("""
+    *********************************************************
+    *   Create KUB Data                                     *
+    *********************************************************
+    """)
     # Duration args destruction
     start_date_time = duration.get('start_date_time', None)
     end_date_time = duration.get('end_date_time', None)
@@ -55,7 +60,8 @@ def create_kub_timeseries(adapter, stations, duration, opts):
         shape_polygon = get_basin_shape(shp)
 
         for station in stations:
-            print('station:', station)
+            print('\n**************** STATION **************')
+            print('station:', station['name'])
             #  Check whether station exists
             is_station_exists = adapter.get_station({'name': station['name']})
             if is_station_exists is None:
@@ -181,6 +187,11 @@ def create_kub_timeseries(adapter, stations, duration, opts):
 
 
 def create_klb_timeseries(adapter, stations, duration, opts):
+    print("""
+    *********************************************************
+    *   Create KLB Data                                     *
+    *********************************************************
+    """)
     # Duration args destruction
     start_date_time = duration.get('start_date_time', None)
     end_date_time = duration.get('end_date_time', None)
@@ -212,7 +223,8 @@ def create_klb_timeseries(adapter, stations, duration, opts):
         shape_polygon = get_basin_shape(shp)
 
         for station in stations:
-            print('station:', station)
+            print('\n**************** STATION **************')
+            print('station:', station['name'])
             #  Check whether station exists
             is_station_exists = adapter.get_station({'name': station['name']})
             if is_station_exists is None:

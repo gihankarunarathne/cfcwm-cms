@@ -39,7 +39,6 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
         common_format[key] = None
     timeseries = []
     for item in result:
-        print(item)
         # Mapping Response to common format
         new_item = copy.deepcopy(common_format)
         # -- DateUTC
@@ -102,7 +101,6 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
         if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
     for line in data:
-        print(line)
         # Mapping Response to common format
         new_item = copy.deepcopy(common_format)
         # -- DateUTC
@@ -132,6 +130,11 @@ def get_timeseries(station, start_date, end_date):
 
 
 def create_raw_timeseries(adapter, stations, duration, opts):
+    print("""
+    *********************************************************
+    *   Create Raw Data                                     *
+    *********************************************************
+    """)
     start_date_time = duration.get('start_date_time', None)
     end_date_time = duration.get('end_date_time', None)
     force_insert = opts.get('force_insert', False)
@@ -146,7 +149,8 @@ def create_raw_timeseries(adapter, stations, duration, opts):
     }
 
     for station in stations:
-        print('station:', station)
+        print('\n**************** STATION **************')
+        print('station:', station['name'], '(%s)' % station['run_name'])
         #  Check whether station exists
         is_station_exists = adapter.get_station({'name': station['name']})
         if is_station_exists is None:
@@ -169,13 +173,10 @@ def create_raw_timeseries(adapter, stations, duration, opts):
             print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
             continue
 
-        print(timeseries)
         print('Start Date :', timeseries[0]['DateUTC'])
         print('End Date :', timeseries[-1]['DateUTC'])
         startDateTime = datetime.strptime(timeseries[0]['DateUTC'], '%Y-%m-%d %H:%M:%S')
         endDateTime = datetime.strptime(timeseries[-1]['DateUTC'], '%Y-%m-%d %H:%M:%S')
-        print(timeseries[:3])
-        # continue;
 
         meta = copy.deepcopy(metaData)
         meta['station'] = station['name']

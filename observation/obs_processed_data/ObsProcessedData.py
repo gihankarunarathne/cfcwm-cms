@@ -19,6 +19,11 @@ def get_interpolated_timeseries(timeseries, variable):
 
 
 def create_processed_timeseries(adapter, stations, duration, opts):
+    print("""
+    *********************************************************
+    *   Create Processed Data                               *
+    *********************************************************
+    """)
     start_date_time = duration.get('start_date_time', None)
     end_date_time = duration.get('end_date_time', None)
     force_insert = opts.get('force_insert', False)
@@ -33,7 +38,8 @@ def create_processed_timeseries(adapter, stations, duration, opts):
     }
 
     for station in stations:
-        print('station:', station)
+        print('\n**************** STATION **************')
+        print('station:', station['name'])
         #  Check whether station exists
         is_station_exists = adapter.get_station({'name': station['name']})
         if is_station_exists is None:

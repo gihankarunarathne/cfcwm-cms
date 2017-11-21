@@ -43,14 +43,15 @@ try:
     forceInsert = False
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM-DD.", required=True)
+    parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM-DD.")
     parser.add_argument("--start-time", help="Start Time in HH:MM:SS.")
-    parser.add_argument("-d", "--back-start", help="")
+    parser.add_argument("-b", "--back-start", help="")
     parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.")
     parser.add_argument("--end-time", help="End Time in HH:MM:SS.")
-    parser.add_argument("-c", "--config", help="Configuration file of timeseries. Default is ./OBS_CONFIG.json.")
+    parser.add_argument("-c", "--config", help="Configuration file of timeseries. "
+                                               "Default is ./config/StationConfig.json.")
     parser.add_argument("-f", "--force", action="store_true", help="Force insert.")
-    parser.add_argument("-m", "--mode", choices=['raw', 'processed', 'virtual', 'virtual_kub', 'virtual_klb'],
+    parser.add_argument("-m", "--mode", choices=['raw', 'processed', 'virtual', 'virtual_kub', 'virtual_klb', 'all'],
                         default='raw', type=str,
                         help="One of 'all' | 'raw' | 'processed' | 'virtual' | 'virtual_kub' | 'virtual_klb'. "
                              "Default is 'raw'")
@@ -66,9 +67,11 @@ try:
     if args.end_date:
         end_date_time = datetime.strptime(args.end_date, '%Y-%m-%d')
     if args.back_start:
-        start_date_time = (end_date_time - timedelta(hours=args.back_start))
-    else:
+        start_date_time = (end_date_time - timedelta(hours=int(args.back_start)))
+    elif args.start_date:
         start_date_time = datetime.strptime(args.start_date, '%Y-%m-%d')
+    else:
+        start_date_time = end_date_time
 
     if args.end_time:
         end_date_time = datetime.strptime("%s %s" % (end_date_time.strftime("%Y-%m-%d"), args.end_time),
@@ -76,7 +79,7 @@ try:
     if args.start_time:
         start_date_time = datetime.strptime("%s %s" % (start_date_time, args.start_time), '%Y-%m-%d %H:%M:%S')
 
-    print('Observation data extraction:', datetime.now().strftime(Constant.DATE_TIME_FORMAT), 'on', ROOT_DIR)
+    print('Observation data extraction starts on:', datetime.now().strftime(Constant.DATE_TIME_FORMAT), 'at', ROOT_DIR)
     if forceInsert:
         print('WARNING: Force Insert enabled.')
 
@@ -113,6 +116,7 @@ try:
 
     duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
     opts = dict(forceInsert=forceInsert)
+    print('Duration::', duration, 'Opts::', opts)
 
     modeDict.get(args.mode, default)(adapter, stations, duration, opts)
 
