@@ -65,8 +65,8 @@ class ObsRawDataTest(unittest.TestCase):
         CON_DATA = json.loads(open(OBS_CONFIG).read())
         stations = CON_DATA['stations']
         self.logger.debug('stations %s', stations)
-        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        start_date_time = datetime.datetime(2017, 10, 20, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 20, 23, 0, 0)
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
         opts = dict(forceInsert=False)
 
@@ -74,10 +74,11 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_getDialogTimeseries(self):
         self.logger.info('getDialogTimeseries')
-        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        start_date_time = datetime.datetime(2017, 11, 21, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 11, 21, 1, 0, 0)
         dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
-        print(dialog_timeseries)
+        print('Length:', len(dialog_timeseries))
+        print(dialog_timeseries[10:])
         self.assertGreater(len(dialog_timeseries), 0)
 
     def test_getWUndergroundTimeseries(self):
@@ -90,8 +91,8 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_extractSinglePrecipitationDialogTimeseries(self):
         self.logger.info('test_extractSinglePrecipitationDialogTimeseries')
-        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        start_date_time = datetime.datetime(2017, 10, 20, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 10, 20, 23, 0, 0)
         dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
         print(dialog_timeseries)
         self.assertGreater(len(dialog_timeseries), 0)

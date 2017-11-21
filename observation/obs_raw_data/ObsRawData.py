@@ -3,11 +3,11 @@ import copy
 import json
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from curwmysqladapter import Station
-from cms_utils import UtilTimeseries
+from cms_utils import UtilTimeseries, UtilValidation
 
-# from ..config import Constants as con
+from ..config import Constants as Constant
 
 
 def get_weather_station_data_format():
@@ -18,9 +18,11 @@ def get_weather_station_data_format():
 def get_dialog_timeseries(station, start_date_time, end_date_time):
     # https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php?mac=3674010756837033&rows=5000
     base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php'
+    now = datetime.now()
+    rows = int((now - start_date_time) / timedelta(seconds=15))
     payload = {
         'mac': station['stationId'],
-        'rows': 5
+        'rows': rows
     }
     result = requests.get(base_url, params=payload, allow_redirects=False)
     result = result.text.strip()
@@ -39,19 +41,21 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
         common_format[key] = None
     timeseries = []
     for item in result:
-        # Mapping Response to common format
-        new_item = copy.deepcopy(common_format)
-        # -- DateUTC
-        if 'paramValue10_s' in item:
-            new_item['DateUTC'] = item['paramValue10_s']
-        # -- TemperatureC
-        if 'paramValue3_s' in item:
-            new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
-        # -- PrecipitationMM
-        if 'paramValue8_s' in item:
-            new_item['PrecipitationMM'] = item['paramValue8_s']
+        item_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT)
+        if start_date_time <= item_time <= end_date_time:
+            # Mapping Response to common format
+            new_item = copy.deepcopy(common_format)
+            # -- DateUTC
+            if 'paramValue10_s' in item:
+                new_item['DateUTC'] = item['paramValue10_s']
+            # -- TemperatureC
+            if 'paramValue3_s' in item:
+                new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
+            # -- PrecipitationMM
+            if 'paramValue8_s' in item:
+                new_item['PrecipitationMM'] = item['paramValue8_s']
 
-        timeseries.append(new_item)
+            timeseries.append(new_item)
 
     return timeseries
     # --END get_timeseries --
@@ -212,6 +216,10 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                     continue
 
             extractedTimeseries = UtilTimeseries.extract_single_variable_timeseries(timeseries, variables[i])
+            extractedTimeseries = UtilValidation.handle_duplicate_values(extractedTimeseries)
+            if station['run_name'] == 'Dialog':
+                print('Dialog::')
+                print(extractedTimeseries)
 
             for l in extractedTimeseries[:3] + extractedTimeseries[-2:]:
                 print(l)

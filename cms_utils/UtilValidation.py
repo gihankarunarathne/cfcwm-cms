@@ -19,6 +19,14 @@ def validate_timeseries(timeseries, validation=None):
     return newTimeseries
 
 
+def handle_duplicate_values(timeseries):
+    for index, step in enumerate(timeseries):
+        if step in timeseries[index:min(index+3, len(timeseries))]:
+            print('Duplicate:', step)
+
+    return timeseries
+
+
 def timeseries_availability(timeseries, validation=None, percentage=80):
     """
     Check the availability of values for given percentage
