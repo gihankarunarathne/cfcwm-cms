@@ -148,9 +148,13 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             thiessen_factor = thiessen_dict[t_station_name] / total_area
             for tt in points_timeseries.get(t_station_name, []):
                 key = tt[0].timestamp()
+                # If key doesn't contain in the dictionary, create new key
                 if key not in upper_thiessen_values:
-                    upper_thiessen_values[key] = 0
-                    upper_thiessen_values[key] += float(tt[1]) * thiessen_factor
+                    if float(tt[1]) > -0.0001:
+                        upper_thiessen_values[key] = float(tt[1]) * thiessen_factor
+                else:
+                    # Added to thiessen value at that timestamp
+                    upper_thiessen_values[key] += float(tt[1]) * (thiessen_factor if float(tt[1]) > -0.0001 else 0)
 
         # Iterate through each timestamp
         kub_timeseries = []
@@ -319,9 +323,11 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 key = tt[0].timestamp()
                 # If key doesn't contain in the dictionary, create new key
                 if key not in lower_thiessen_values:
-                    lower_thiessen_values[key] = 0
-                # Added to thiessen value at that timestamp
-                lower_thiessen_values[key] += float(tt[1]) * thiessen_factor
+                    if float(tt[1]) > -0.0001:
+                        lower_thiessen_values[key] = float(tt[1]) * thiessen_factor
+                else:
+                    # Added to thiessen value at that timestamp
+                    lower_thiessen_values[key] += float(tt[1]) * (thiessen_factor if float(tt[1]) > -0.0001 else 0)
 
         # Iterate through each timestamp
         klb_timeseries = []

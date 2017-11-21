@@ -11,6 +11,7 @@ from observation.config import Constants as Constant
 
 sl_offset = timedelta(hours=5, minutes=30)
 
+
 def get_weather_station_data_format():
     script_path = os.path.dirname(os.path.realpath(__file__))
     return json.loads(open(os.path.join(script_path, './WeatherStation.json')).read())
@@ -88,6 +89,7 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     if len(data) < 1:
         logging.warning('Timeseries does not have any data for station: %s', station['name'])
         return []
+    # TODO: Handle when need to get data from previous day
 
     common_format = get_weather_station_data_format()
     for key in common_format:
