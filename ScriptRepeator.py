@@ -8,9 +8,11 @@ from subprocess import Popen
 
 try:
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--file-path", help="File name to be executed.")
-    parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM.")
-    parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.")
+    parser.add_argument("-p", "--file-path", help="File name to be executed.", required=True)
+    parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM.", required=True)
+    parser.add_argument("--start-time", help="Start Time in HH:MM:SS.")
+    parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.", required=True)
+    parser.add_argument("--end-time", help="End Time in HH:MM:SS.")
     parser.add_argument("-i", "--interval", help="Time Interval between two events in hours. Default 24 hours")
     parser.add_argument("-f", "--force", action='store_true', help="Force insert.")
     parser.add_argument("-v", "--version", help="Python version. eg: python3")
@@ -23,14 +25,15 @@ try:
 
     timeInterval = 24
 
-    if not args.file_path and args.start_date:
-        print('All fields required.')
-        sys.exit(2)
     if args.interval:
         timeInterval = int(args.interval)
 
     startDate = datetime.datetime.strptime(args.start_date, '%Y-%m-%d')
+    if args.start_time:
+        startDate = datetime.datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y-%m-%d %H:%M:%S')
     endDate = datetime.datetime.strptime(args.end_date, '%Y-%m-%d')
+    if args.end_time:
+        endDate = datetime.datetime.strptime('%s %s' % (args.end_date, args.end_time), '%Y-%m-%d %H:%M:%S')
 
     pythonV = "python"
     if args.version:
