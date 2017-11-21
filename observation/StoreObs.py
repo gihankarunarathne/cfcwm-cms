@@ -40,7 +40,7 @@ try:
     if 'MYSQL_PASSWORD' in CONFIG:
         MYSQL_PASSWORD = CONFIG['MYSQL_PASSWORD']
 
-    forceInsert = False
+    force_insert = False
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM-DD.")
@@ -60,12 +60,16 @@ try:
 
     if args.config:
         OBS_CONFIG = os.path.join(ROOT_DIR, args.config)
-    forceInsert = args.force
+    force_insert = args.force
 
     # Default End Date is current date
     end_date_time = datetime.now()
     if args.end_date:
         end_date_time = datetime.strptime(args.end_date, '%Y-%m-%d')
+    if args.end_time:
+        end_date_time = datetime.strptime("%s %s" % (end_date_time.strftime("%Y-%m-%d"), args.end_time),
+                                          '%Y-%m-%d %H:%M:%S')
+
     if args.back_start:
         start_date_time = (end_date_time - timedelta(hours=int(args.back_start)))
     elif args.start_date:
@@ -74,14 +78,11 @@ try:
         # Default Start & End date time gap is one hour
         start_date_time = (end_date_time - timedelta(hours=1))
 
-    if args.end_time:
-        end_date_time = datetime.strptime("%s %s" % (end_date_time.strftime("%Y-%m-%d"), args.end_time),
-                                          '%Y-%m-%d %H:%M:%S')
     if args.start_time:
         start_date_time = datetime.strptime("%s %s" % (start_date_time, args.start_time), '%Y-%m-%d %H:%M:%S')
 
     print('Observation data extraction starts on:', datetime.now().strftime(Constant.DATE_TIME_FORMAT), 'at', ROOT_DIR)
-    if forceInsert:
+    if force_insert:
         print('WARNING: Force Insert enabled.')
 
     CON_DATA = json.loads(open(OBS_CONFIG).read())
@@ -116,11 +117,12 @@ try:
 
 
     duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
-    opts = dict(forceInsert=forceInsert)
+    opts = dict(force_insert=force_insert)
     print('Duration::', duration, 'Opts::', opts)
 
     modeDict.get(args.mode, default)(adapter, stations, duration, opts)
 
 except Exception as e:
     logging.error(e)
+    print(e)
     traceback.print_stack()
