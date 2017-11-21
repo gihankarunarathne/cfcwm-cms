@@ -15,7 +15,7 @@ try:
     parser.add_argument("-f", "--force", action='store_true', help="Force insert.")
     parser.add_argument("-v", "--version", help="Python version. eg: python3")
     parser.add_argument("--add-end-date", action='store_true', help="Whether to add end date for params")
-    parser.add_argument("-m", "--mode", help="One of 'raw' | 'processed' | 'virtual'")
+    parser.add_argument("-m", "--mode", help="One of 'all' | 'raw' | 'processed' | 'virtual'")
     parser.add_argument("--add-mode", action='store_true', help="Whether to add mode for params")
     args = parser.parse_args()
     print('Commandline Options:', args)

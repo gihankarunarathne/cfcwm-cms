@@ -9,6 +9,7 @@ from cms_utils import UtilTimeseries, UtilValidation
 
 from observation.config import Constants as Constant
 
+sl_offset = timedelta(hours=5, minutes=30)
 
 def get_weather_station_data_format():
     script_path = os.path.dirname(os.path.realpath(__file__))
@@ -42,13 +43,15 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
         common_format[key] = None
     timeseries = []
     for item in result:
-        item_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT)
-        if start_date_time <= item_time <= end_date_time:
+        sl_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT) + sl_offset
+        if start_date_time <= sl_time <= end_date_time:
             # Mapping Response to common format
             new_item = copy.deepcopy(common_format)
             # -- DateUTC
             if 'paramValue10_s' in item:
                 new_item['DateUTC'] = item['paramValue10_s']
+            # -- Time
+            new_item['Time'] = sl_time.strftime(Constant.DATE_TIME_FORMAT)
             # -- TemperatureC
             if 'paramValue3_s' in item:
                 new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
@@ -106,12 +109,14 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
         if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
     for line in data:
-        line_time = datetime.strptime(line[DateUTCIndex], Constant.DATE_TIME_FORMAT)
-        if start_date_time <= line_time <= end_date_time:
+        sl_time = datetime.strptime(line[DateUTCIndex], Constant.DATE_TIME_FORMAT) + sl_offset
+        if start_date_time <= sl_time <= end_date_time:
             # Mapping Response to common format
             new_item = copy.deepcopy(common_format)
             # -- DateUTC
             new_item['DateUTC'] = line[DateUTCIndex]
+            # -- Time
+            new_item['Time'] = sl_time.strftime(Constant.DATE_TIME_FORMAT)
             # -- TemperatureC
             new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
                 if TemperatureCFactor else float(line[TemperatureCIndex])
