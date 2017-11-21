@@ -69,28 +69,49 @@ def get_dialog_timeseries(station, start_date_time, end_date_time):
 def get_wu_timeseries(station, start_date_time, end_date_time):
     #  'https://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=IBATTARA2&month=6&day=28&year=2017&format=1'
     base_url = 'https://www.wunderground.com/weatherstation/WXDailyHistory.asp'
-    payload = {
-        'ID': station['stationId'],
-        'day': end_date_time.day,
-        'month': end_date_time.month,
-        'year': end_date_time.year,
-        'format': 1
-    }
-    r = requests.get(base_url, params=payload)
-    lines = r.text.replace('<br>', '').split('\n')
 
-    data_lines = []
-    for line in lines:
-        lineSplit = line.split(',')
-        if len(lineSplit) > 1:
-            data_lines.append(lineSplit)
+    def get_wu_data(date):
+        payload = {
+            'ID': station['stationId'],
+            'day': date.day,
+            'month': date.month,
+            'year': date.year,
+            'format': 1
+        }
+        r = requests.get(base_url, params=payload)
+        lines = r.text.replace('<br>', '').split('\n')
 
-    WUndergroundMeta, *data = data_lines
+        data_lines = []
+        for data_line in lines:
+            lineSplit = data_line.split(',')
+            if len(lineSplit) > 1:
+                data_lines.append(lineSplit)
+
+        if len(data_lines) > 1:
+            WUndergroundMeta1, *new_data1 = data_lines
+            return {'WUndergroundMeta': WUndergroundMeta1, 'new_data': new_data1}
+        else:
+            return None
+
+    loop_date = datetime.strptime(start_date_time.strftime("%Y-%m-%d"), "%Y-%m-%d")
+    data = []
+    WUndergroundMeta = []
+    while loop_date <= end_date_time:
+        new_data = get_wu_data(loop_date)
+        if new_data is not None:
+            WUndergroundMeta = new_data.get('WUndergroundMeta')
+            data = data + new_data.get('new_data')
+
+        loop_date += timedelta(days=1)
+
     if len(data) < 1:
         logging.warning('Timeseries does not have any data for station: %s', station['name'])
         return []
-    # TODO: Handle when need to get data from previous day
+    if len(WUndergroundMeta) < 1:
+        logging.warning('Timeseries WU Metadata is not valid: %s', station['name'])
+        return []
 
+    print('WUndergroundMeta', WUndergroundMeta)
     common_format = get_weather_station_data_format()
     for key in common_format:
         common_format[key] = None
@@ -188,10 +209,10 @@ def create_raw_timeseries(adapter, stations, duration, opts):
             print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
             continue
 
-        print('Start Date :', timeseries[0]['DateUTC'])
-        print('End Date :', timeseries[-1]['DateUTC'])
-        startDateTime = datetime.strptime(timeseries[0]['DateUTC'], '%Y-%m-%d %H:%M:%S')
-        endDateTime = datetime.strptime(timeseries[-1]['DateUTC'], '%Y-%m-%d %H:%M:%S')
+        print('Start Date :', timeseries[0]['Time'])
+        print('End Date :', timeseries[-1]['Time'])
+        startDateTime = datetime.strptime(timeseries[0]['Time'], '%Y-%m-%d %H:%M:%S')
+        endDateTime = datetime.strptime(timeseries[-1]['Time'], '%Y-%m-%d %H:%M:%S')
 
         meta = copy.deepcopy(metaData)
         meta['station'] = station['name']

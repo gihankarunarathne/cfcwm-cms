@@ -188,7 +188,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             }
             existingTimeseries = adapter.retrieve_timeseries(metaKUB, opts)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
-                print('\n')
+                print('Timeseries already exists. Use force insert to insert data.\n')
                 continue
 
         rowCount = \
@@ -361,7 +361,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             }
             existingTimeseries = adapter.retrieve_timeseries(metaKLB, opts)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
-                print('\n')
+                print('Timeseries already exists. Use force insert to insert data.\n')
                 continue
 
         rowCount = \

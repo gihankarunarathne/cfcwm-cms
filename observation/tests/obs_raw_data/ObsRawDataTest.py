@@ -89,6 +89,14 @@ class ObsRawDataTest(unittest.TestCase):
         print(wu_timeseries)
         self.assertGreater(len(wu_timeseries), 0)
 
+    def test_getWUndergroundTimeseriesYatiwawala(self):
+        self.logger.info('getWUndergroundTimeseries')
+        start_date_time = datetime.datetime(2017, 11, 1, 23, 0, 0)
+        end_date_time = datetime.datetime(2017, 11, 2, 1, 0, 0)
+        wu_timeseries = get_wu_timeseries({'stationId': 'Yatiwawala', 'name': 'Yatiwawala'}, start_date_time, end_date_time)
+        print('wu_timeseries', wu_timeseries)
+        self.assertGreater(len(wu_timeseries), 0)
+
     def test_extractSinglePrecipitationDialogTimeseries(self):
         self.logger.info('test_extractSinglePrecipitationDialogTimeseries')
         start_date_time = datetime.datetime(2017, 10, 20, 0, 0, 0)
