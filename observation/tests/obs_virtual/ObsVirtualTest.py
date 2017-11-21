@@ -42,8 +42,8 @@ class ObsVirtualTest(unittest.TestCase):
 
             cls.adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
             cls.eventIds = []
-            cls.run_start_date = datetime.datetime(2017, 10, 1, 0, 0, 0)
-            cls.run_end_date = datetime.datetime(2017, 10, 1, 23, 0, 0)
+            cls.run_start_date = datetime.datetime(2017, 11, 20, 0, 0, 0)
+            cls.run_end_date = datetime.datetime(2017, 11, 20, 12, 0, 0)
         except Exception as e:
             traceback.print_exc()
 
@@ -66,7 +66,7 @@ class ObsVirtualTest(unittest.TestCase):
         start_date_time = self.run_start_date
         end_date_time = self.run_end_date
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
-        opts = dict(forceInsert=True)
+        opts = dict(force_insert=True)
 
         create_kub_timeseries(self.adapter, stations, duration, opts)
 
@@ -79,6 +79,6 @@ class ObsVirtualTest(unittest.TestCase):
         start_date_time = self.run_start_date
         end_date_time = self.run_end_date
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
-        opts = dict(forceInsert=True)
+        opts = dict(force_insert=True)
 
         create_klb_timeseries(self.adapter, stations, duration, opts)

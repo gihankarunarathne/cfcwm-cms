@@ -85,12 +85,12 @@ def create_processed_timeseries(adapter, stations, duration, opts):
                 'mode': Data.processed_data,
             }
             existingTimeseries = adapter.retrieve_timeseries(meta, new_opts)
-            print(existingTimeseries)
             if len(existingTimeseries) and len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
                 print('\n')
                 continue
 
-            for l in filled_timeseries[:3] + filled_timeseries[-2:]:
+            print('Interpolated Timeseries::')
+            for l in filled_timeseries[:2] + filled_timeseries[-2:]:
                 print(l)
 
             rowCount = \

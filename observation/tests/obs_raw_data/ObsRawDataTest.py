@@ -65,8 +65,8 @@ class ObsRawDataTest(unittest.TestCase):
         CON_DATA = json.loads(open(OBS_CONFIG).read())
         stations = CON_DATA['stations']
         self.logger.debug('stations %s', stations)
-        start_date_time = datetime.datetime(2017, 10, 20, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 20, 23, 0, 0)
+        start_date_time = datetime.datetime(2017, 11, 20, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 11, 20, 12, 0, 0)
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
         opts = dict(forceInsert=False)
 

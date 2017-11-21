@@ -26,7 +26,7 @@ class StoreObsTest(unittest.TestCase):
             cls.logger.info('setUpClass')
 
             cls.run_start_date = datetime.datetime(2017, 11, 20, 0, 0, 0)
-            cls.run_end_date = datetime.datetime(2017, 11, 20, 23, 0, 0)
+            cls.run_end_date = datetime.datetime(2017, 11, 20, 12, 0, 0)
         except Exception as e:
             logging.error(e)
             traceback.print_exc()
