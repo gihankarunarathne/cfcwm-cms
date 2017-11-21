@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 
-import sys, datetime, traceback, argparse
+import argparse
+import datetime
+import sys
+import traceback
 from subprocess import Popen
 
 try:
@@ -53,6 +56,7 @@ try:
 except ValueError:
     raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 except Exception as e:
+    print(e)
     traceback.print_exc()
 finally:
     print('Successfully run Script Repeater !.')
