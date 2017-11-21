@@ -45,7 +45,7 @@ try:
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--start-date", help="Start Date in YYYY-MM-DD.")
     parser.add_argument("--start-time", help="Start Time in HH:MM:SS.")
-    parser.add_argument("-b", "--back-start", help="")
+    parser.add_argument("-b", "--back-start", help="Set start date with respect to end-date in hours")
     parser.add_argument("-e", "--end-date", help="End Date in YYYY-MM.")
     parser.add_argument("--end-time", help="End Time in HH:MM:SS.")
     parser.add_argument("-c", "--config", help="Configuration file of timeseries. "
@@ -71,7 +71,8 @@ try:
     elif args.start_date:
         start_date_time = datetime.strptime(args.start_date, '%Y-%m-%d')
     else:
-        start_date_time = end_date_time
+        # Default Start & End date time gap is one hour
+        start_date_time = (end_date_time - timedelta(hours=1))
 
     if args.end_time:
         end_date_time = datetime.strptime("%s %s" % (end_date_time.strftime("%Y-%m-%d"), args.end_time),
