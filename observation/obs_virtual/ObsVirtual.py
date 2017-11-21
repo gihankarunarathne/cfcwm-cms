@@ -8,10 +8,10 @@ from datetime import datetime
 import geopandas as gpd
 from curw.rainfall.wrf.extraction.spatial_utils import get_voronoi_polygons
 from curwmysqladapter import Data, Station
-from shapely.geometry import Point
 
 from cms_utils.UtilValidation import timeseries_availability
 from observation.resource import ResourceManager
+from observation.obs_virtual.ObsVirtualUtils import is_unique_points
 
 
 def get_basin_shape(shape_file):
@@ -95,7 +95,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 station_timeseries = station_timeseries[0]['timeseries']
             else:
                 print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"),
-                      station_timeseries)
+                      opts, station_timeseries)
                 continue
 
             # -- Check whether timeseries worth to count in
@@ -118,10 +118,16 @@ def create_kub_timeseries(adapter, stations, duration, opts):
 
         if len(points) < 1:
             logging.warning("No station data found for given period of time. Abort...")
+            print("No station data found for given period of time. Abort...")
             continue
         else:
-            logging.info('Available stations %s', points)
-            print('Available stations:', points)
+            if is_unique_points(points):
+                logging.info('Available stations %s', points)
+                print('Available stations:', points)
+            else:
+                logging.warning("Available points should be unique. Abort...")
+                print("Available points should be unique. Abort...")
+                continue
         # -- Create thiessen polygon
         out = tempfile.mkdtemp(prefix='voronoi_')
         result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
@@ -283,8 +289,13 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             logging.warning("No station data found for given period of time. Abort...")
             continue
         else:
-            logging.info('Available stations %s', points)
-            print('Available stations:', points)
+            if is_unique_points(points):
+                logging.info('Available stations %s', points)
+                print('Available stations:', points)
+            else:
+                logging.warning("Available points should be unique. Abort...")
+                print("Available points should be unique. Abort...")
+                continue
         # -- Create thiessen polygon
         logging.debug("Create thiessen polygon using points: %s", points)
         out = tempfile.mkdtemp(prefix='voronoi_')
