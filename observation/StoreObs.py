@@ -68,7 +68,7 @@ try:
         end_date_time = datetime.strptime(args.end_date, '%Y-%m-%d')
     if args.end_time:
         end_date_time = datetime.strptime("%s %s" % (end_date_time.strftime("%Y-%m-%d"), args.end_time),
-                                          '%Y-%m-%d %H:%M:%S')
+                                          Constant.DATE_TIME_FORMAT)
 
     if args.back_start:
         start_date_time = (end_date_time - timedelta(hours=int(args.back_start)))
@@ -79,7 +79,7 @@ try:
         start_date_time = (end_date_time - timedelta(hours=1))
 
     if args.start_time:
-        start_date_time = datetime.strptime("%s %s" % (start_date_time, args.start_time), '%Y-%m-%d %H:%M:%S')
+        start_date_time = datetime.strptime("%s %s" % (start_date_time.strftime("%Y-%m-%d"), args.start_time), Constant.DATE_TIME_FORMAT)
 
     print('Observation data extraction starts on:', datetime.now().strftime(Constant.DATE_TIME_FORMAT), 'at', ROOT_DIR)
     if force_insert:
