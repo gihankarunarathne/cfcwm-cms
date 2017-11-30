@@ -1,6 +1,9 @@
 {
-    "MYSQL_HOST"        : "localhost",
-    "MYSQL_USER"        : "curw",
-    "MYSQL_PASSWORD"    : "curw@123",
-    "MYSQL_DB"          : "curw"
+    "MYSQL_HOST"            : "localhost",
+    "MYSQL_USER"            : "curw",
+    "MYSQL_PASSWORD"        : "curw@123",
+    "MYSQL_DB"              : "curw",
+
+    "DIALOG_IOT_USERNAME"   : "",
+    "DIALOG_IOT_PASSWORD"   : ""
 }

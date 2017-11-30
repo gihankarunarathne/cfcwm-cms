@@ -4,6 +4,7 @@ import json
 import os
 import logging
 from datetime import datetime, timedelta
+from requests.auth import HTTPBasicAuth
 from curwmysqladapter import Station
 from cms_utils import UtilTimeseries, UtilValidation
 
@@ -17,17 +18,27 @@ def get_weather_station_data_format():
     return json.loads(open(os.path.join(script_path, './WeatherStation.json')).read())
 
 
-def get_dialog_timeseries(station, start_date_time, end_date_time):
+def get_dialog_timeseries(station, start_date_time, end_date_time, opts=None):
+    if opts is None:
+        opts = {}
+
     # https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php?mac=3674010756837033&rows=5000
-    base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php'
+    base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/getDataByMac.php'
     now = datetime.now()
     rows = int((now - start_date_time) / timedelta(seconds=15))
     print('Dialog::need to get %s rows' % rows)
     payload = {
         'mac': station['stationId'],
-        'rows': rows
+        'from': (start_date_time - sl_offset).strftime('%Y-%m-%dT%H:%M:%S'),
+        'to': (end_date_time - sl_offset).strftime('%Y-%m-%dT%H:%M:%S'),
     }
-    result = requests.get(base_url, params=payload, allow_redirects=False)
+    auth = HTTPBasicAuth(opts.get('dialog_iot_username'), opts.get('dialog_iot_password'))
+    result = requests.get(base_url, params=payload, allow_redirects=False, auth=auth)
+    if not result.ok or result.status_code != 200:
+        logging.error("Unable to retrieve data from Dialog.")
+        logging.error(result)
+        return []
+
     result = result.text.strip()
     if result.startswith("<pre>") and result.endswith("</pre>"):
         result = result[5:-6]
@@ -155,17 +166,31 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
     # --END get_timeseries --
 
 
-def get_timeseries(station, start_date, end_date):
+def get_timeseries(station, start_date, end_date, opts):
     if station['run_name'] == 'WUnderground':
         return get_wu_timeseries(station, start_date, end_date)
     elif station['run_name'] == 'Dialog':
-        return get_dialog_timeseries(station, start_date, end_date)
+        return get_dialog_timeseries(station, start_date, end_date, opts)
     else:
         logging.warning("Unknown host to retrieve the data %s", station['run_name'])
         return []
 
 
 def create_raw_timeseries(adapter, stations, duration, opts):
+    """
+    Create Raw Timeseries by retrieving data from given stations
+
+    :param adapter: Instance of MySQLAdapter from curwmysqladapter
+    :param stations: List of Station Meta Objects. Refer to config/StationConfig.json
+    :param duration: dict(start_date_time=<Datetime>, end_date_time=<Datetime>)
+    :param opts: dict of following fields,
+    {
+        force_insert: True/False,
+        dialog_iot_username: "",
+        dialog_iot_password: ""
+    }
+    :return:
+    """
     print("""
     *********************************************************
     *   Create Raw Data                                     *
@@ -203,7 +228,7 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                 logging.warning('Continue with others', station['name'])
                 continue
 
-        timeseries = get_timeseries(station, start_date_time, end_date_time)
+        timeseries = get_timeseries(station, start_date_time, end_date_time, opts)
 
         if len(timeseries) < 1:
             print('INFO: Timeseries does not have any data on :', end_date_time.strftime("%Y-%m-%d"), timeseries)
@@ -238,11 +263,11 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                 metaQuery['unit'] = units[i]
                 if 'run_name' in station:
                     metaQuery['name'] = station['run_name']
-                opts = {
+                query_opts = {
                     'from': startDateTime.strftime("%Y-%m-%d %H:%M:%S"),
                     'to': endDateTime.strftime("%Y-%m-%d %H:%M:%S")
                 }
-                existingTimeseries = adapter.retrieve_timeseries(metaQuery, opts)
+                existingTimeseries = adapter.retrieve_timeseries(metaQuery, query_opts)
                 if len(existingTimeseries[0]['timeseries']) > 0 and not force_insert:
                     print('Timeseries already exists. Use force insert to insert data.\n')
                     continue

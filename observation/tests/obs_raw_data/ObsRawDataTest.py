@@ -21,7 +21,7 @@ class ObsRawDataTest(unittest.TestCase):
     def setUpClass(cls):
         try:
             cls.root_dir = os.path.dirname(os.path.realpath(__file__))
-            config = json.loads(open(pjoin(cls.root_dir, '../../config/CONFIG.json')).read())
+            cls.config = json.loads(open(pjoin(cls.root_dir, '../../config/CONFIG.json')).read())
 
             # Initialize Logger
             logging_config = json.loads(open(pjoin(cls.root_dir, '../../config/LOGGING_CONFIG.json')).read())
@@ -35,18 +35,19 @@ class ObsRawDataTest(unittest.TestCase):
             MYSQL_DB = "curw"
             MYSQL_PASSWORD = ""
 
-            if 'MYSQL_HOST' in config:
-                MYSQL_HOST = config['MYSQL_HOST']
-            if 'MYSQL_USER' in config:
-                MYSQL_USER = config['MYSQL_USER']
-            if 'MYSQL_DB' in config:
-                MYSQL_DB = config['MYSQL_DB']
-            if 'MYSQL_PASSWORD' in config:
-                MYSQL_PASSWORD = config['MYSQL_PASSWORD']
+            if 'MYSQL_HOST' in cls.config:
+                MYSQL_HOST = cls.config['MYSQL_HOST']
+            if 'MYSQL_USER' in cls.config:
+                MYSQL_USER = cls.config['MYSQL_USER']
+            if 'MYSQL_DB' in cls.config:
+                MYSQL_DB = cls.config['MYSQL_DB']
+            if 'MYSQL_PASSWORD' in cls.config:
+                MYSQL_PASSWORD = cls.config['MYSQL_PASSWORD']
 
             cls.adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
             cls.eventIds = []
         except Exception as e:
+            print(e)
             traceback.print_exc()
 
     @classmethod
@@ -76,10 +77,23 @@ class ObsRawDataTest(unittest.TestCase):
         self.logger.info('getDialogTimeseries')
         start_date_time = datetime.datetime(2017, 11, 21, 0, 0, 0)
         end_date_time = datetime.datetime(2017, 11, 21, 1, 0, 0)
-        dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
+        username = self.config['DIALOG_IOT_USERNAME'] if 'DIALOG_IOT_USERNAME' in self.config else None
+        password = self.config['DIALOG_IOT_PASSWORD'] if 'DIALOG_IOT_PASSWORD' in self.config else None
+        opts = dict(dialog_iot_username=username, dialog_iot_password=password)
+        station = {'stationId': '3674010756837033'}
+        dialog_timeseries = get_dialog_timeseries(station, start_date_time, end_date_time, opts)
         print('Length:', len(dialog_timeseries))
         print(dialog_timeseries[10:])
         self.assertGreater(len(dialog_timeseries), 0)
+
+    def test_getDialogTimeseriesWithoutAuth(self):
+        self.logger.info('test_getDialogTimeseriesWithoutAuth')
+        start_date_time = datetime.datetime(2017, 11, 21, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 11, 21, 1, 0, 0)
+        dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
+        print('Length:', len(dialog_timeseries))
+        print(dialog_timeseries)
+        self.assertEqual(len(dialog_timeseries), 0)
 
     def test_getWUndergroundTimeseries(self):
         self.logger.info('getWUndergroundTimeseries')
