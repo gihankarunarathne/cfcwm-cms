@@ -21,6 +21,9 @@ def get_weather_station_data_format():
 def get_dialog_timeseries(station, start_date_time, end_date_time, opts=None):
     if opts is None:
         opts = {}
+    if 'dialog_iot_username' not in opts or 'dialog_iot_password' not in opts:
+        logging.error("Need Dialog Username & Password in order get data from IoT server.")
+        return []
 
     # https://apps.ideabiz.lk/weather/WeatherStationData/LocationDataByMac.php?mac=3674010756837033&rows=5000
     base_url = 'https://apps.ideabiz.lk/weather/WeatherStationData/getDataByMac.php'

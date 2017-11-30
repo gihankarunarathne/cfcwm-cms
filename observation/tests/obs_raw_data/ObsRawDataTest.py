@@ -66,10 +66,12 @@ class ObsRawDataTest(unittest.TestCase):
         CON_DATA = json.loads(open(OBS_CONFIG).read())
         stations = CON_DATA['stations']
         self.logger.debug('stations %s', stations)
-        start_date_time = datetime.datetime(2017, 11, 20, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 11, 20, 12, 0, 0)
+        start_date_time = datetime.datetime(2017, 11, 28, 0, 0, 0)
+        end_date_time = datetime.datetime(2017, 11, 28, 1, 0, 0)
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
-        opts = dict(forceInsert=False)
+        username = self.config['DIALOG_IOT_USERNAME'] if 'DIALOG_IOT_USERNAME' in self.config else None
+        password = self.config['DIALOG_IOT_PASSWORD'] if 'DIALOG_IOT_PASSWORD' in self.config else None
+        opts = dict(forceInsert=False, dialog_iot_username=username, dialog_iot_password=password)
 
         create_raw_timeseries(self.adapter, stations, duration, opts)
 

@@ -118,6 +118,10 @@ try:
 
     duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
     opts = dict(force_insert=force_insert)
+    if 'DIALOG_IOT_USERNAME' in CONFIG:
+        opts['dialog_iot_username'] = CONFIG['DIALOG_IOT_USERNAME']
+    if 'DIALOG_IOT_PASSWORD' in CONFIG:
+        opts['dialog_iot_password'] = CONFIG['DIALOG_IOT_PASSWORD']
     print('Duration::', duration, 'Opts::', opts)
 
     modeDict.get(args.mode, default)(adapter, stations, duration, opts)
