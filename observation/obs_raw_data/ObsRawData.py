@@ -58,23 +58,28 @@ def get_dialog_timeseries(station, start_date_time, end_date_time, opts=None):
         common_format[key] = None
     timeseries = []
     for item in result:
-        sl_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT) + sl_offset
-        if start_date_time <= sl_time <= end_date_time:
-            # Mapping Response to common format
-            new_item = copy.deepcopy(common_format)
-            # -- DateUTC
-            if 'paramValue10_s' in item:
-                new_item['DateUTC'] = item['paramValue10_s']
-            # -- Time
-            new_item['Time'] = sl_time.strftime(Constant.DATE_TIME_FORMAT)
-            # -- TemperatureC
-            if 'paramValue3_s' in item:
-                new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
-            # -- PrecipitationMM
-            if 'paramValue8_s' in item:
-                new_item['PrecipitationMM'] = item['paramValue8_s']
+        try:
+            sl_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT) + sl_offset
+            if start_date_time <= sl_time <= end_date_time:
+                # Mapping Response to common format
+                new_item = copy.deepcopy(common_format)
+                # -- DateUTC
+                if 'paramValue10_s' in item:
+                    new_item['DateUTC'] = item['paramValue10_s']
+                # -- Time
+                new_item['Time'] = sl_time.strftime(Constant.DATE_TIME_FORMAT)
+                # -- TemperatureC
+                if 'paramValue3_s' in item:
+                    new_item['TemperatureC'] = (float(item['paramValue3_s']) - 32) * 5 / 9
+                # -- PrecipitationMM
+                if 'paramValue8_s' in item:
+                    new_item['PrecipitationMM'] = item['paramValue8_s']
 
-            timeseries.append(new_item)
+                timeseries.append(new_item)
+        except Exception as e:
+            logging.error("Error while reading Dialog Data. Continue with next time step.")
+            logging.error(e)
+            continue
 
     return timeseries
     # --END get_timeseries --
