@@ -19,7 +19,7 @@ try:
     ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
     os.chdir(ROOT_DIR)
 
-    CONFIG = json.loads(open(os.path.join(ROOT_DIR, '../CONFIG.json')).read())
+    CONFIG = json.loads(open(os.path.join(ROOT_DIR, './config/CONFIG.json')).read())
 
     OBS_CONFIG = "./config/StationConfig.json"
 

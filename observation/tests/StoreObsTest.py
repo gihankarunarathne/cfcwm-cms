@@ -45,10 +45,14 @@ class StoreObsTest(unittest.TestCase):
         self.logger.info('runScriptForAll')
         execList = ['python', pjoin(self.root_dir, '../StoreObs.py')]
         execList = execList + ['-s', self.run_start_date.strftime("%Y-%m-%d")]
+        execList = execList + ['--start-time', self.run_start_date.strftime("%H:%M:%S")]
         execList = execList + ['-f']
         execList = execList + ['-e', self.run_end_date.strftime("%Y-%m-%d")]
+        execList = execList + ['--end-time', self.run_end_date.strftime("%H:%M:%S")]
         execList = execList + ['-m', 'all']
         print('*********************************************************')
         print('>>>', execList, '\n')
-        process = Popen(execList, stdout=PIPE)
+        process = Popen(execList, stdout=PIPE, stdin=PIPE)
+        for line in process.stdout.readlines():
+            print(line)
         process.wait()
