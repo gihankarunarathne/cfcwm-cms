@@ -74,14 +74,16 @@ def extract_single_variable_timeseries(timeseries, variable, opts=None):
         print('precipitation:: PrecipitationMM')
         newTimeseries = []
         for t in my_timeseries:
-            newTimeseries.append([t['Time'], t['PrecipitationMM']])
+            if t['PrecipitationMM'] is not None:
+                newTimeseries.append([t['Time'], t['PrecipitationMM']])
         return newTimeseries
 
     def temperature(my_timeseries):
         print('temperature:: TemperatureC')
         newTimeseries = []
         for t in my_timeseries:
-            newTimeseries.append([t['Time'], t['TemperatureC']])
+            if t['TemperatureC'] is not None:
+                newTimeseries.append([t['Time'], t['TemperatureC']])
         return newTimeseries
 
     def default(my_timeseries):

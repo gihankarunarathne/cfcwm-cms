@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+
 def validate_timeseries(timeseries, validation=None):
     """
     Validate Timeseries against given rules

@@ -136,20 +136,20 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
         common_format[key] = None
 
     DateUTCIndex = WUndergroundMeta.index('DateUTC')
-    TemperatureCFactor = False
+    is_temp_in_F = False
     TemperatureCIndex = WUndergroundMeta.index('TemperatureC') if 'TemperatureC' in WUndergroundMeta else None
     if TemperatureCIndex is None:
         TemperatureCIndex = WUndergroundMeta.index('TemperatureF')
-        TemperatureCFactor = True
-    PrecipitationMMFactor = False
+        is_temp_in_F = True
+    is_precip_in_IN = False
     PrecipitationMMIndex = WUndergroundMeta.index('dailyrainMM') if 'dailyrainMM' in WUndergroundMeta else None
     if PrecipitationMMIndex is None:
         PrecipitationMMIndex = WUndergroundMeta.index('dailyrainin')
-        PrecipitationMMFactor = True
+        is_precip_in_IN = True
 
     timeseries = []
     prevPrecipitationMM = float(data[0][PrecipitationMMIndex]) * 25.4 \
-        if PrecipitationMMFactor else float(data[0][PrecipitationMMIndex])
+        if is_precip_in_IN else float(data[0][PrecipitationMMIndex])
     for line in data:
         sl_time = datetime.strptime(line[DateUTCIndex], Constant.DATE_TIME_FORMAT) + sl_offset
         if start_date_time <= sl_time <= end_date_time:
@@ -161,12 +161,11 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
             new_item['Time'] = sl_time.strftime(Constant.DATE_TIME_FORMAT)
             # -- TemperatureC
             new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
-                if TemperatureCFactor else float(line[TemperatureCIndex])
+                if is_temp_in_F else float(line[TemperatureCIndex])
             # -- PrecipitationMM
             new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
-                if PrecipitationMMFactor else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
-            prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
-                if PrecipitationMMFactor else float(line[PrecipitationMMIndex])
+                if is_precip_in_IN else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
+            prevPrecipitationMM = new_item['PrecipitationMM']
 
             timeseries.append(new_item)
 
@@ -286,9 +285,6 @@ def create_raw_timeseries(adapter, stations, duration, opts):
                 'min_value': station['min_values'][i],
             }
             extractedTimeseries = UtilValidation.handle_duplicate_values(extractedTimeseries, validation_obj)
-            if station['run_name'] == 'Dialog':
-                print('Dialog::')
-                print(extractedTimeseries)
 
             for l in extractedTimeseries[:3] + extractedTimeseries[-2:]:
                 print(l)
