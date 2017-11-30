@@ -100,6 +100,18 @@
             "description": "UDUWAWALA STATION",
             "run_name": "WUnderground"
         }, {
+            "stationId": "ICOLOMBO20",
+            "name": "Orugodawatta",
+            "station_meta": ["curw_orugodawatta", "Orugodawatta", 6.943741, 79.87887, 0, "SLLRDC Colombo North Office"],
+            "source": "WeatherStation",
+            "type": "Observed",
+            "variables": ["Precipitation", "Temperature"],
+            "units": ["mm", "oC"],
+            "max_values": ["120", "40"],
+            "min_values": ["0", "0"],
+            "description": "SLLRDC Colombo North Office",
+            "run_name": "WUnderground"
+        }, {
             "stationId": "3674010756837033",
             "name": "Hingurana",
             "station_meta": ["curw_hingurana", "Hingurana", 6.904552, 80.407895, 0, "Hingurana Station"],
