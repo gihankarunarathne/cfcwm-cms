@@ -3,9 +3,9 @@
 import sys, traceback, csv, json, datetime, getopt, os, copy, requests, argparse
 
 from curwmysqladapter import MySQLAdapter
-from .LibContinousTimeseries import getTimeseries
-from .LibContinousTimeseries import extractSigleTimeseries
-from .LibContinousValidation import validateTimeseries
+from continous.LibContinousTimeseries import getTimeseries
+from continous.LibContinousTimeseries import extractSigleTimeseries
+from continous.LibContinousValidation import validateTimeseries
 
 try:
     INIT_DIR = os.getcwd()
