@@ -163,12 +163,17 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
             new_item['TemperatureC'] = (float(line[TemperatureCIndex]) - 32) * 5 / 9 \
                 if is_temp_in_F else float(line[TemperatureCIndex])
             # -- PrecipitationMM
-            new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
-                if is_precip_in_IN else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
-            prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
+            currPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
                 if is_precip_in_IN else float(line[PrecipitationMMIndex])
+            if currPrecipitationMM < prevPrecipitationMM and currPrecipitationMM == 0:
+                new_item['PrecipitationMM'] = 0
+            else:
+                new_item['PrecipitationMM'] = currPrecipitationMM - prevPrecipitationMM
 
             timeseries.append(new_item)
+        # Save previous value
+        prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
+            if is_precip_in_IN else float(line[PrecipitationMMIndex])
 
     return timeseries
     # --END get_timeseries --
