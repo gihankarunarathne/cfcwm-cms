@@ -165,7 +165,8 @@ def get_wu_timeseries(station, start_date_time, end_date_time):
             # -- PrecipitationMM
             new_item['PrecipitationMM'] = float(line[PrecipitationMMIndex]) * 25.4 - prevPrecipitationMM \
                 if is_precip_in_IN else float(line[PrecipitationMMIndex]) - prevPrecipitationMM
-            prevPrecipitationMM = new_item['PrecipitationMM']
+            prevPrecipitationMM = float(line[PrecipitationMMIndex]) * 25.4 \
+                if is_precip_in_IN else float(line[PrecipitationMMIndex])
 
             timeseries.append(new_item)
 
