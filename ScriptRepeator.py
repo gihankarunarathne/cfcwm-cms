@@ -20,6 +20,7 @@ try:
     parser.add_argument("--add-end-date", action='store_true', help="Whether to add end date for params")
     parser.add_argument("-m", "--mode", help="One of 'all' | 'raw' | 'processed' | 'virtual'")
     parser.add_argument("--add-mode", action='store_true', help="Whether to add mode for params")
+    parser.add_argument("-c", "--config", help="Configuration file.")
     args = parser.parse_args()
     print('Commandline Options:', args)
 
@@ -55,6 +56,8 @@ try:
             execList = execList + ['--end-time', tmpEndDate.strftime("%H:%M:%S")]
         if args.add_mode:
             execList = execList + ['-m', args.mode]
+        if args.config:
+            execList = execList + ['-c', args.config]
         print('*********************************************************')
         print('>>>', execList, '\n')
         proc = Popen(execList, stdout=sys.stdout)
