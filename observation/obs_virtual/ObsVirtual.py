@@ -150,6 +150,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 key = tt[0].timestamp()
                 # If key doesn't contain in the dictionary, create new key
                 if key not in upper_thiessen_values:
+                    # If precipitation is not a positive values, does not create a value for that timestamp
                     if float(tt[1]) > -0.0001:
                         upper_thiessen_values[key] = float(tt[1]) * thiessen_factor
                 else:
@@ -323,6 +324,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 key = tt[0].timestamp()
                 # If key doesn't contain in the dictionary, create new key
                 if key not in lower_thiessen_values:
+                    # If precipitation is not a positive values, does not create a value for that timestamp
                     if float(tt[1]) > -0.0001:
                         lower_thiessen_values[key] = float(tt[1]) * thiessen_factor
                 else:

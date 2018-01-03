@@ -1,10 +1,16 @@
 #!/usr/bin/python3
 
-import sys, traceback, csv, json, datetime, getopt, os, copy, requests, argparse
+import argparse
+import copy
+import datetime
+import json
+import os
+import traceback
 
 from curwmysqladapter import MySQLAdapter
-from continous.LibContinousTimeseries import getTimeseries
+
 from continous.LibContinousTimeseries import extractSigleTimeseries
+from continous.LibContinousTimeseries import getTimeseries
 from continous.LibContinousValidation import validateTimeseries
 
 try:
@@ -14,7 +20,7 @@ try:
 
     CONFIG = json.loads(open(os.path.join(ROOT_DIR, '../CONFIG.json')).read())
 
-    CONTINOUS_CONFIG="./CONTINOUS_CONFIG.json"
+    CONTINUOUS_CONFIG= "./CONTINUOUS_CONFIG.json"
     COMMON_DATE_FORMAT="%Y-%m-%d %H:%M:%S"
 
     MYSQL_HOST="localhost"
@@ -23,7 +29,7 @@ try:
     MYSQL_PASSWORD=""
 
     if 'CONTINOUS_CONFIG' in CONFIG :
-        CONTINOUS_CONFIG = CONFIG['CONTINOUS_CONFIG']
+        CONTINUOUS_CONFIG = CONFIG['CONTINOUS_CONFIG']
 
     if 'MYSQL_HOST' in CONFIG :
         MYSQL_HOST = CONFIG['MYSQL_HOST']
@@ -37,20 +43,20 @@ try:
     forceInsert = False
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", help="Configuration file of timeseries. Default is ./CONTINOUS_CONFIG.json.")
+    parser.add_argument("-c", "--config", help="Configuration file of timeseries. Default is ./CONTINUOUS_CONFIG.json.")
     parser.add_argument("-f", "--force", action="store_true", help="Force insert.")
     args = parser.parse_args()
     print('Commandline Options:', args)
 
     if args.config :
-        CONTINOUS_CONFIG = os.path.join(ROOT_DIR, args.config)
+        CONTINUOUS_CONFIG = os.path.join(ROOT_DIR, args.config)
     forceInsert = args.force
 
-    print('Continous data extraction:', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'on', ROOT_DIR)
-    if forceInsert :
+    print('Continuous data extraction:', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'on', ROOT_DIR)
+    if forceInsert:
         print('WARNING: Force Insert enabled.')
 
-    CON_DATA = json.loads(open(CONTINOUS_CONFIG).read())
+    CON_DATA = json.loads(open(CONTINUOUS_CONFIG).read())
 
     stations = CON_DATA['stations']
 
@@ -68,12 +74,12 @@ try:
         print('station:', station)
         dataLocation = station['data_location']
         timeseries = getTimeseries(dataLocation, {
-            'root_dir'  : ROOT_DIR,
+            'root_dir': ROOT_DIR,
             'common_date_format': COMMON_DATE_FORMAT
         })
 
-        if(len(timeseries) < 1): 
-            print('INFO: Timeseries doesn\'t have any data on :', now.strftime("%Y-%m-%d"), timeseries)
+        if len(timeseries) < 1:
+            print('INFO: Timeseries does not have any data.')
             continue
         print('Start Date :', timeseries[0][0])
         print('End Date :', timeseries[-1][0])
@@ -93,10 +99,10 @@ try:
         units = station['units']
         max_values = station['max_values']
         min_values = station['min_values']
-        if 'run_name' in station :
+        if 'run_name' in station:
             meta['name'] = station['run_name']
 
-        for i in range(0, len(variables)) :
+        for i in range(0, len(variables)):
             meta['variable'] = variables[i]
             meta['unit'] = units[i]
             print('meta', meta)
@@ -112,7 +118,7 @@ try:
                 metaQuery['source'] = station['source']
                 metaQuery['variable'] = variables[i]
                 metaQuery['unit'] = units[i]
-                if 'run_name' in station :
+                if 'run_name' in station:
                     metaQuery['name'] = station['run_name']
                 opts = {
                     'from': startDateTime.strftime(COMMON_DATE_FORMAT),
@@ -141,7 +147,8 @@ try:
             print('%s rows inserted.\n' % rowCount)
 
 
-except Exception as e :
+except Exception as e:
     traceback.print_exc()
+    print(e)
 finally:
     os.chdir(INIT_DIR)

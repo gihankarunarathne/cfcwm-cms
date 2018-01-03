@@ -2,6 +2,7 @@
 
 import sys, traceback, csv, json, datetime, getopt, os, copy, requests, argparse, re
 
+
 def getTimeseries(location, opts) :
     locationType = location['type']
 
@@ -13,6 +14,7 @@ def getTimeseries(location, opts) :
         'file': getTimeseriesFromFile,
     }
     return accessDict.get(locationType, default)(location, opts)
+
 
 def getTimeseriesFromFile(location, opts) :
     ROOT_DIR = opts['root_dir']

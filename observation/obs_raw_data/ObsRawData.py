@@ -58,6 +58,7 @@ def get_dialog_timeseries(station, start_date_time, end_date_time, opts=None):
         common_format[key] = None
     timeseries = []
     for item in result:
+        # TODO: Extract Precipitation from Accumulate Rainfall
         try:
             sl_time = datetime.strptime(item['paramValue10_s'], Constant.DATE_TIME_FORMAT) + sl_offset
             if start_date_time <= sl_time <= end_date_time:
