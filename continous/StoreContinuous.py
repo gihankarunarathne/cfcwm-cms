@@ -7,7 +7,7 @@ import json
 import os
 import traceback
 
-from curwmysqladapter import MySQLAdapter
+from curwmysqladapter import MySQLAdapter, Station
 
 from continous.LibContinousTimeseries import extractSigleTimeseries
 from continous.LibContinousTimeseries import getTimeseries
@@ -72,6 +72,24 @@ try:
 
     for station in stations :
         print('station:', station)
+        #  Check whether station exists
+        is_station_exists = adapter.get_station({'name': station['name']})
+        if is_station_exists is None:
+            print('Station %s does not exists.', station['name'])
+            if 'station_meta' in station and 'station_type' in station:
+                station_meta = station['station_meta']
+                station_meta.insert(0, Station.getType(station['station_type']))
+                row_count = adapter.create_station(station_meta)
+                if row_count > 0:
+                    print('Created new station %s', station_meta)
+                    is_station_exists = adapter.get_station({'name': station['name']})
+                else:
+                    print("Unable to create station %s", station_meta)
+                    continue
+            else:
+                print("Could not find station meta data or station_type to create new ", station['name'])
+                continue
+
         dataLocation = station['data_location']
         timeseries = getTimeseries(dataLocation, {
             'root_dir': ROOT_DIR,

@@ -1,7 +1,7 @@
 {
     "stations": [
         {
-            "stationId"     : "Hanwella",
+            "stationId"     : "curw_hanwella",
             "data_location" : {
                 "type"          : "file",
                 "location"      : "../events/2017MayFloodPrecip/hanwella_test.csv",
@@ -12,6 +12,8 @@
                 "values"        : ["Timestamp", "Precipitation"]
             },
             "name"          : "Hanwella",
+            "station_meta"  : ["curw_hanwella", "Hanwella", 6.872778, 80.564444, 0, "Hanwella Weather Station"],
+            "station_type"  : "CUrW",
             "run_name"      : "2017 May Flood",
             "source"        : "WeatherStation",
             "type"          : "Observed",
