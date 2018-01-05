@@ -73,6 +73,9 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             # if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
             #     logging.warning('Station %s does not contains inside KUB. Continue with others', station['name'])
             #     continue
+            if 'basin' in station and station['basin'].lower() != 'kub':
+                logging.warning('Station %s does not contains inside KUB. Continue with others', station['name'])
+                continue
 
             meta['station'] = station['name']
             if 'run_name' in station:
@@ -114,7 +117,7 @@ def create_kub_timeseries(adapter, stations, duration, opts):
             if is_available:
                 points[station['name']] = [is_station_exists['longitude'], is_station_exists['latitude']]
                 points_timeseries[station['name']] = station_timeseries
-        # -- END Getting data from stations
+        # -- END For Loop - Getting data from stations
 
         if len(points) < 1:
             logging.warning("No station data found for given period of time. Abort...")
@@ -128,17 +131,29 @@ def create_kub_timeseries(adapter, stations, duration, opts):
                 logging.warning("Available points should be unique: %s. Abort...", points)
                 print("Available points should be unique: %s. Abort..." % points)
                 continue
-        # -- Create thiessen polygon
-        out = tempfile.mkdtemp(prefix='voronoi_')
-        result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
-        print(result)
+
         thiessen_dict = {}
         total_area = 0.0
-        for row in result.iterrows():
-            if row[1][0] is not '__total_area__':
-                thiessen_dict[row[1][0]] = row[1][3]
-            elif row[1][0] is '__total_area__':
-                total_area = row[1][3]
+        # If there's one station, take as it's
+        if len(points) is 1:
+            thiessen_dict[list(points.keys())[0]] = 1
+            total_area = 1
+        # If there's two stations, take avarage of both
+        elif len(points) is 2:
+            thiessen_dict[list(points.keys())[0]] = 0.5
+            thiessen_dict[list(points.keys())[1]] = 0.5
+            total_area = 1
+        # If there's more than two stations, then create thiessen polygon
+        else:
+            logging.debug("Create thiessen polygon for KUB using points: %s", points)
+            out = tempfile.mkdtemp(prefix='voronoi_')
+            result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
+            print(result)
+            for row in result.iterrows():
+                if row[1][0] is not '__total_area__':
+                    thiessen_dict[row[1][0]] = row[1][3]
+                elif row[1][0] is '__total_area__':
+                    total_area = row[1][3]
 
         if total_area is 0.0:
             logging.warning('Total Area can not be 0.0')
@@ -247,6 +262,9 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             # if not Point(is_station_exists['longitude'], is_station_exists['latitude']).within(shape_polygon):
             #     logging.warning('Station %s does not contains inside KLB. Continue with others', station['name'])
             #     continue
+            if 'basin' in station and station['basin'].lower() != 'klb':
+                logging.warning('Station %s does not contains inside KLB. Continue with others', station['name'])
+                continue
 
             meta['station'] = station['name']
             if 'run_name' in station:
@@ -288,7 +306,7 @@ def create_klb_timeseries(adapter, stations, duration, opts):
             if is_available:
                 points[station['name']] = [is_station_exists['longitude'], is_station_exists['latitude']]
                 points_timeseries[station['name']] = station_timeseries
-        # -- END Getting data from stations
+        # -- END For Loop - Getting data from stations
 
         if len(points) < 1:
             logging.warning("No station data found for given period of time. Abort...")
@@ -301,18 +319,29 @@ def create_klb_timeseries(adapter, stations, duration, opts):
                 logging.warning("Available points should be unique: %s. Abort...", points)
                 print("Available points should be unique: %s. Abort..." % points)
                 continue
-        # -- Create thiessen polygon
-        logging.debug("Create thiessen polygon using points: %s", points)
-        out = tempfile.mkdtemp(prefix='voronoi_')
-        result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
-        print(result)
+
         thiessen_dict = {}
         total_area = 0.0
-        for row in result.iterrows():
-            if row[1][0] is not '__total_area__':
-                thiessen_dict[row[1][0]] = row[1][3]
-            elif row[1][0] is '__total_area__':
-                total_area = row[1][3]
+        # If there's one station, take as it's
+        if len(points) is 1:
+            thiessen_dict[list(points.keys())[0]] = 1
+            total_area = 1
+        # If there's two stations, take avarage of both
+        elif len(points) is 2:
+            thiessen_dict[list(points.keys())[0]] = 0.5
+            thiessen_dict[list(points.keys())[1]] = 0.5
+            total_area = 1
+        # If there's more than two stations, then create thiessen polygon
+        else:
+            logging.debug("Create thiessen polygon for KLB using points: %s", points)
+            out = tempfile.mkdtemp(prefix='voronoi_')
+            result = get_voronoi_polygons(points, shp, ['OBJECTID', 1], output_shape_file=os.path.join(out, 'out.shp'))
+            print(result)
+            for row in result.iterrows():
+                if row[1][0] is not '__total_area__':
+                    thiessen_dict[row[1][0]] = row[1][3]
+                elif row[1][0] is '__total_area__':
+                    total_area = row[1][3]
 
         if total_area is 0.0:
             logging.warning('Total Area can not be 0.0')

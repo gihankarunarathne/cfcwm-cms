@@ -73,8 +73,8 @@ class InterpolationStrategy(Enum):
             new_timeseries = []
             for index, step in enumerate(timeseries[1:]):
                 if step[0] < next_tick:
-                    if step[1] > -1:
-                        if total > -1:
+                    if step[1] > -1:  # If value is not a missing value, then take account
+                        if total > -1:  # Check until total is not a missing value
                             total += step[1]
                             count += 1
                         else:

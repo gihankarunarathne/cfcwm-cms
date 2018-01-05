@@ -42,8 +42,8 @@ class ObsVirtualTest(unittest.TestCase):
 
             cls.adapter = MySQLAdapter(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, db=MYSQL_DB)
             cls.eventIds = []
-            cls.run_start_date = datetime.datetime(2017, 11, 20, 0, 0, 0)
-            cls.run_end_date = datetime.datetime(2017, 11, 20, 12, 0, 0)
+            cls.run_start_date = datetime.datetime(2018, 1, 2, 12, 0, 0)
+            cls.run_end_date = datetime.datetime(2018, 1, 2, 16, 0, 0)
         except Exception as e:
             traceback.print_exc()
 

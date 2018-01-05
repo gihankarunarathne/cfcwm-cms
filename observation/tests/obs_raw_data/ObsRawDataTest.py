@@ -66,8 +66,8 @@ class ObsRawDataTest(unittest.TestCase):
         CON_DATA = json.loads(open(OBS_CONFIG).read())
         stations = CON_DATA['stations']
         self.logger.debug('stations %s', stations)
-        start_date_time = datetime.datetime(2017, 11, 20, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 11, 20, 1, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 2, 12, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 2, 16, 0, 0)
         duration = dict(start_date_time=start_date_time, end_date_time=end_date_time)
         username = self.config['DIALOG_IOT_USERNAME'] if 'DIALOG_IOT_USERNAME' in self.config else None
         password = self.config['DIALOG_IOT_PASSWORD'] if 'DIALOG_IOT_PASSWORD' in self.config else None
@@ -77,8 +77,8 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_getDialogTimeseries(self):
         self.logger.info('getDialogTimeseries')
-        start_date_time = datetime.datetime(2017, 11, 21, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 11, 21, 1, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 3, 0, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 3, 1, 0, 0)
         username = self.config['DIALOG_IOT_USERNAME'] if 'DIALOG_IOT_USERNAME' in self.config else None
         password = self.config['DIALOG_IOT_PASSWORD'] if 'DIALOG_IOT_PASSWORD' in self.config else None
         opts = dict(dialog_iot_username=username, dialog_iot_password=password)
@@ -90,8 +90,8 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_getDialogTimeseriesWithoutAuth(self):
         self.logger.info('test_getDialogTimeseriesWithoutAuth')
-        start_date_time = datetime.datetime(2017, 11, 21, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 11, 21, 1, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 3, 0, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 3, 1, 0, 0)
         dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
         print('Length:', len(dialog_timeseries))
         print(dialog_timeseries)
@@ -99,24 +99,24 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_getWUndergroundTimeseries(self):
         self.logger.info('getWUndergroundTimeseries')
-        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 1, 23, 0, 0)
         wu_timeseries = get_wu_timeseries({'stationId': 'IBATTARA3'}, start_date_time, end_date_time)
         print(wu_timeseries)
         self.assertGreater(len(wu_timeseries), 0)
 
     def test_getWUndergroundTimeseriesYatiwawala(self):
         self.logger.info('getWUndergroundTimeseries')
-        start_date_time = datetime.datetime(2017, 11, 1, 23, 0, 0)
-        end_date_time = datetime.datetime(2017, 11, 2, 1, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 1, 23, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 2, 1, 0, 0)
         wu_timeseries = get_wu_timeseries({'stationId': 'Yatiwawala', 'name': 'Yatiwawala'}, start_date_time, end_date_time)
         print('wu_timeseries', wu_timeseries)
         self.assertGreater(len(wu_timeseries), 0)
 
     def test_extractSinglePrecipitationDialogTimeseries(self):
         self.logger.info('test_extractSinglePrecipitationDialogTimeseries')
-        start_date_time = datetime.datetime(2017, 10, 20, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 20, 23, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 2, 0, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 2, 23, 0, 0)
         dialog_timeseries = get_dialog_timeseries({'stationId': '3674010756837033'}, start_date_time, end_date_time)
         print(dialog_timeseries)
         self.assertGreater(len(dialog_timeseries), 0)
@@ -127,8 +127,8 @@ class ObsRawDataTest(unittest.TestCase):
 
     def test_extractSinglePrecipitationWUndergroundTimeseries(self):
         self.logger.info('test_extractSinglePrecipitationWUndergroundTimeseries')
-        start_date_time = datetime.datetime(2017, 10, 1, 0, 0, 0)
-        end_date_time = datetime.datetime(2017, 10, 1, 23, 0, 0)
+        start_date_time = datetime.datetime(2018, 1, 1, 0, 0, 0)
+        end_date_time = datetime.datetime(2018, 1, 1, 23, 0, 0)
         wu_timeseries = get_wu_timeseries({'stationId': 'IBATTARA3'}, start_date_time, end_date_time)
         print(wu_timeseries)
         self.assertGreater(len(wu_timeseries), 0)
